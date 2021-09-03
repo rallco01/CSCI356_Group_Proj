@@ -4,28 +4,14 @@ using UnityEngine;
 
 public class PlanetScript : MonoBehaviour
 {
-	// Start is called before the first frame update
-	void Start()
-	{
-		
-	}
-
-	// Update is called once per frame
-	void Update()
-	{
-		
-	}
-
 	private void OnTriggerEnter(Collider other)
 	{
 		Debug.Log("ote:" + other.name);
-		//other.GetComponent<PlayerController>().setBoi(gameObject);
 		other.gameObject.AddComponent<gravity>().addBoi(gameObject, other.gameObject);
 	}
 
 	private void OnTriggerExit(Collider other)
 	{
-		//other.GetComponent<PlayerController>().resetBoi();
 		Destroy(other.gameObject.GetComponent<gravity>());
 	}
 }

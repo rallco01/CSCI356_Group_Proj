@@ -5,10 +5,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
 	private Vector3 rot;
-	//private Vector3 vel;
-	//private Vector3 pos;
 
-	
 	public float thrust = 10;
 	public float throttle = 100;
 	public float throttleResponse = 10;
@@ -16,15 +13,8 @@ public class PlayerController : MonoBehaviour
 	public float cameraHeight = 10;
 	public float rcon = 10;
 	public bool angdra = true;
-	private Camera mainCam;
 
 	private GameObject boi;
-
-	void Start()
-	{
-		mainCam = GetComponentInChildren<Camera>();
-		//Debug.Log(mainCam.name);
-	}
 
 	void Update()
 	{
@@ -33,6 +23,7 @@ public class PlayerController : MonoBehaviour
 		float x = 0;
 		float r = 0;
 		bool kpress = false;
+
 		if (Input.GetKey(KeyCode.LeftShift))
 		{
 			throttle += throttleResponse * t;
@@ -41,6 +32,7 @@ public class PlayerController : MonoBehaviour
 				throttle = 100;
 			}
 		}
+
 		if (Input.GetKey(KeyCode.LeftControl))
 		{
 			throttle -= throttleResponse * t;
@@ -49,57 +41,48 @@ public class PlayerController : MonoBehaviour
 				throttle = 0;
 			}
 		}
+
 		if (Input.GetKey(KeyCode.W))
 		{
 			z += throttle * t * thrust;
 			kpress = true;
 		}
+
 		if (Input.GetKey(KeyCode.S))
 		{
 			z -= throttle * t * thrust;
 			kpress = true;
 		}
+
 		if (Input.GetKey(KeyCode.A))
 		{
 			x -= throttle * t * thrust;
 			kpress = true;
 		}
+
 		if (Input.GetKey(KeyCode.D))
 		{
 			x += throttle * t * thrust;
 			kpress = true;
 		}
+
 		if (Input.GetKey(KeyCode.Q))
 		{
 			r -= rspeed * t;
 			kpress = true;
 		}
+
 		if (Input.GetKey(KeyCode.E))
 		{
 			r += rspeed * t;
 			kpress = true;
 		}
-		if (Input.GetKey(KeyCode.T))
-		{
-			angdra = !angdra;
-		}
-		if (angdra)
-		{
-			gameObject.GetComponent<Rigidbody>().angularDrag = 1;
-		}
-		else
-		{
-			gameObject.GetComponent<Rigidbody>().angularDrag = 0;
-		}
+
 		if (kpress)
 		{
 			rot.y += r;
 			gameObject.GetComponent<Rigidbody>().AddRelativeForce(x, 0, z);
 			gameObject.GetComponent<Rigidbody>().AddRelativeTorque(0, r, 0);
-			//transform.eulerAngles = rot;
-			mainCam.transform.eulerAngles = new Vector3(mainCam.transform.eulerAngles.x, mainCam.transform.eulerAngles.y-r, mainCam.transform.eulerAngles.z);
 		}
-		mainCam.transform.Translate(0, 0, Input.mouseScrollDelta.y);
-
 	}
 }
