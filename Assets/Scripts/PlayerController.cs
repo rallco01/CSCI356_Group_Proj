@@ -16,8 +16,9 @@ public class PlayerController : MonoBehaviour
 	public float cameraHeight = 10;
 	public float rcon = 10;
 	public bool angdra = true;
-
 	private Camera mainCam;
+
+	private GameObject boi;
 
 	void Start()
 	{
@@ -85,7 +86,9 @@ public class PlayerController : MonoBehaviour
 		if (angdra)
 		{
 			gameObject.GetComponent<Rigidbody>().angularDrag = 1;
-		}else{
+		}
+		else
+		{
 			gameObject.GetComponent<Rigidbody>().angularDrag = 0;
 		}
 		if (kpress)
@@ -97,5 +100,19 @@ public class PlayerController : MonoBehaviour
 		}
 		mainCam.transform.Translate(0, 0, Input.mouseScrollDelta.y);
 
+	}
+	
+	public void setBoi(GameObject boi)
+	{
+		Debug.Log("entering SOI of:" + boi.name);
+		this.boi = boi;
+		gameObject.AddComponent<gravity>().addBoi(boi,gameObject);
+	}
+
+	public void resetBoi()
+	{
+		Debug.Log("exeting SOI of:" + boi.name);
+		Destroy(gameObject.GetComponent<gravity>());
+		boi = null;
 	}
 }
