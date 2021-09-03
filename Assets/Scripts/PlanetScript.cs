@@ -26,6 +26,6 @@ public class PlanetScript : MonoBehaviour
 	private void OnTriggerExit(Collider other)
 	{
 		//other.GetComponent<PlayerController>().resetBoi();
-		Destroy(other.GetComponent<gravity>());
+		Destroy(other.gameObject.GetComponent<gravity>());
 	}
 }

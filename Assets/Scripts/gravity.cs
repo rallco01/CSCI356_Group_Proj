@@ -19,7 +19,8 @@ public class gravity : MonoBehaviour
 		if (boi != null && thing != null)
 		{
 			Vector3 vecdir = (boi.transform.position - thing.transform.position).normalized;
-			gameObject.GetComponent<Rigidbody>().AddRelativeForce(new Vector3(vecdir.x, 0, vecdir.z));
+			vecdir *= boi.transform.localScale.magnitude;
+			gameObject.GetComponent<Rigidbody>().AddForce(new Vector3(vecdir.x, 0, vecdir.z));
 		}
 	}
 }

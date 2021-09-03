@@ -95,24 +95,11 @@ public class PlayerController : MonoBehaviour
 		{
 			rot.y += r;
 			gameObject.GetComponent<Rigidbody>().AddRelativeForce(x, 0, z);
-			//gameObject.GetComponent<Rigidbody>().AddRelativeTorque(0, r, 0);
-			transform.eulerAngles = rot;
+			gameObject.GetComponent<Rigidbody>().AddRelativeTorque(0, r, 0);
+			//transform.eulerAngles = rot;
+			mainCam.transform.eulerAngles = new Vector3(mainCam.transform.eulerAngles.x, mainCam.transform.eulerAngles.y-r, mainCam.transform.eulerAngles.z);
 		}
 		mainCam.transform.Translate(0, 0, Input.mouseScrollDelta.y);
 
-	}
-	
-	public void setBoi(GameObject boi)
-	{
-		Debug.Log("entering SOI of:" + boi.name);
-		this.boi = boi;
-		gameObject.AddComponent<gravity>().addBoi(boi,gameObject);
-	}
-
-	public void resetBoi()
-	{
-		Debug.Log("exeting SOI of:" + boi.name);
-		Destroy(gameObject.GetComponent<gravity>());
-		boi = null;
 	}
 }
