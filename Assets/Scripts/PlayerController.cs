@@ -5,19 +5,24 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
 	private Vector3 rot;
-	private Vector3 vel;
-	private Vector3 pos;
+	//private Vector3 vel;
+	//private Vector3 pos;
 
-	private float speed = 10;
-	private float speedspeed = 10;
-	private float cameraHeight = 10;
+	
+	public float thrust = 10;
+	public float throttle = 100;
+	public float throttleResponse = 10;
+	public float rspeed = 10;
+	public float cameraHeight = 10;
+	public float rcon = 10;
+	public bool angdra = true;
 
 	private Camera mainCam;
 
 	void Start()
 	{
 		mainCam = GetComponentInChildren<Camera>();
-		Debug.Log(mainCam.name);
+		//Debug.Log(mainCam.name);
 	}
 
 	void Update()
@@ -25,44 +30,71 @@ public class PlayerController : MonoBehaviour
 		float t = Time.deltaTime;
 		float z = 0;
 		float x = 0;
+		float r = 0;
 		bool kpress = false;
 		if (Input.GetKey(KeyCode.LeftShift))
 		{
-			speed += speedspeed * t;
+			throttle += throttleResponse * t;
+			if (throttle > 100)
+			{
+				throttle = 100;
+			}
 		}
 		if (Input.GetKey(KeyCode.LeftControl))
 		{
-			speed -= speedspeed * t;
-			if(speed < 1)
+			throttle -= throttleResponse * t;
+			if(throttle < 0)
 			{
-				speed = 1;
+				throttle = 0;
 			}
 		}
 		if (Input.GetKey(KeyCode.W))
 		{
-			z += speed * t;
+			z += throttle * t * thrust;
 			kpress = true;
 		}
 		if (Input.GetKey(KeyCode.S))
 		{
-			z -= speed * t;
+			z -= throttle * t * thrust;
 			kpress = true;
 		}
 		if (Input.GetKey(KeyCode.A))
 		{
-			x -= speed * t;
+			x -= throttle * t * thrust;
 			kpress = true;
 		}
 		if (Input.GetKey(KeyCode.D))
 		{
-			x += speed * t;
+			x += throttle * t * thrust;
 			kpress = true;
+		}
+		if (Input.GetKey(KeyCode.Q))
+		{
+			r -= rspeed * t;
+			kpress = true;
+		}
+		if (Input.GetKey(KeyCode.E))
+		{
+			r += rspeed * t;
+			kpress = true;
+		}
+		if (Input.GetKey(KeyCode.T))
+		{
+			angdra = !angdra;
+		}
+		if (angdra)
+		{
+			gameObject.GetComponent<Rigidbody>().angularDrag = 1;
+		}else{
+			gameObject.GetComponent<Rigidbody>().angularDrag = 0;
 		}
 		if (kpress)
 		{
-			gameObject.GetComponent<Rigidbody>().AddRelativeForce(new Vector3(x, 0, z));
+			rot.y += r;
+			gameObject.GetComponent<Rigidbody>().AddRelativeForce(x, 0, z);
+			//gameObject.GetComponent<Rigidbody>().AddRelativeTorque(0, r, 0);
+			transform.eulerAngles = rot;
 		}
-		//cameraHeight += Input.mouseScrollDelta.y;
 		mainCam.transform.Translate(0, 0, Input.mouseScrollDelta.y);
 
 	}

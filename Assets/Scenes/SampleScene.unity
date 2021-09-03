@@ -418,6 +418,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0b5156db904dda4f854bb878a4268ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  thrust: 10
+  throttle: 100
+  throttleResponse: 10
+  rspeed: 100
+  cameraHeight: 10
 --- !u!4 &543450651862050993
 Transform:
   m_ObjectHideFlags: 0
