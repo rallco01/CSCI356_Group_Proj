@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlanetScript : MonoBehaviour
+public class soi : MonoBehaviour
 {
 	private void OnTriggerEnter(Collider other)
 	{

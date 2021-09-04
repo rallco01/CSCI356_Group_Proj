@@ -20,7 +20,7 @@ public class gravity : MonoBehaviour
 		{
 			Vector3 vecdir = (boi.transform.position - thing.transform.position).normalized;
 			vecdir *= boi.transform.localScale.magnitude;
-			gameObject.GetComponent<Rigidbody>().AddForce(new Vector3(vecdir.x, 0, vecdir.z));
+			gameObject.GetComponent<Rigidbody>().AddForce(new Vector3(vecdir.x, vecdir.y, vecdir.z));
 		}
 	}
 }

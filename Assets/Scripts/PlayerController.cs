@@ -25,6 +25,13 @@ public class PlayerController : MonoBehaviour
 
 	private bool wasStabAss = false;
 
+	private projectileLauncher pl = null;
+
+	private void Start()
+	{
+		pl = gameObject.GetComponentInChildren<projectileLauncher>();
+	}
+
 	void Update()
 	{
 		float t = Time.deltaTime;
@@ -110,6 +117,11 @@ public class PlayerController : MonoBehaviour
 		{
 			stabassAngle = transform.eulerAngles.y;
 			stabass = !stabass;
+		}
+
+		if(Input.GetMouseButtonDown(1))
+		{
+			pl.shoot();
 		}
 
 		if (kpress)
