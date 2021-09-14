@@ -138,7 +138,7 @@ public class PlayerController : MonoBehaviour
 
 			if(Mathf.Abs(i) > 180)
 			{
-				i -= 180;
+				i = i % 180;
 				i *= -1;
 			}
 
