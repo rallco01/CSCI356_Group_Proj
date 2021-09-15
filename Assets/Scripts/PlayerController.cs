@@ -130,25 +130,38 @@ public class PlayerController : MonoBehaviour
 			rot.y += r;
 			gameObject.GetComponent<Rigidbody>().AddRelativeTorque(0, r, 0);
 		}
-		
+
+		/* Stability Assist:
+		 * Because the rotation of the ship is controlled through physics
+		 * there needs to be a physics based way to maintain a heading.
+		 * This is done using a PID (proportional integral derivative) controll loop
+		 * to vary the direction and magnitude of a rotatial force to keep a ships heading
+		 * 
+		 *  Proportional (p): A steady heading is have a rotational velocity of 0°/s.
+		 *    This is set to be the angular velocity of the ship in the opposite direction,
+		 *    so that it applies force in the oppisite directoion of its rotation stopping it
+		 *  
+		 *  Integral (i): The intergral of velocity is position, so have a steady heading
+		 *    is having a constant position, x°. This is set to be the difference of between,
+		 *    the current heading and the desired heading.
+		 *  
+		 *  Derivative (d): The derivity of velocity is accelleration.
+		 */
 		if (stabass)
 		{
 			float p = -gameObject.GetComponent<Rigidbody>().angularVelocity.y;
 			float i = stabassAngle - gameObject.transform.eulerAngles.y;
 
-			if(Mathf.Abs(i) > 180)
+			//this is done to make sure it rotates going the shortest distance, especially when going between angle such as 300° and 10° where it crosses 0°
+			if (Mathf.Abs(i) > 180)
 			{
 				i = i % 180;
 				i *= -1;
 			}
 
-			//Debug.Log(i);
-
 			float d = -(gameObject.GetComponent<Rigidbody>().angularVelocity.y-lastAV) / t;
 
 			float PID = P * p + D * d + I*i;
-
-			//Debug.Log(PID);
 
 			gameObject.GetComponent<Rigidbody>().AddRelativeTorque(0, PID, 0);
 		}
