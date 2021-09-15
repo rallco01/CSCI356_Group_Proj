@@ -8,6 +8,7 @@ public class CameraController : MonoBehaviour
 
 	void Update()
 	{
+		//Tracks the camera to a object
 		if(tracking!=null)
 		{
 			transform.position = new Vector3(tracking.transform.position.x, transform.position.y, tracking.transform.position.z);
