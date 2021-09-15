@@ -25,11 +25,13 @@ public class PlayerController : MonoBehaviour
 		if (Input.GetKey(KeyCode.LeftShift))
 		{
 			tr += t;
+			kpress = true;
 		}
 
 		if (Input.GetKey(KeyCode.LeftControl))
 		{
 			tr -= t;
+			kpress = true;
 		}
 
 		if (Input.GetKey(KeyCode.W))
