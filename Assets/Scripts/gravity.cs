@@ -21,7 +21,7 @@ public class gravity : MonoBehaviour
 			Vector3 vec = boi.transform.position - thing.transform.position;
 			Vector3 vecdir = vec.normalized;
 			vecdir *= boi.transform.localScale.magnitude* boi.GetComponent<planetScript>().mass*thing.GetComponent<Rigidbody>().mass;
-			vecdir = (vecdir / (vec.magnitude)) * 0.000000000667430f;
+			vecdir = (vecdir / (vec.magnitude)) * 0.000000000667430f;	//Could this be made a variable rather than a static float, so that we can edit it in the inspector, and change it for different objects
 			gameObject.GetComponent<Rigidbody>().AddForce(new Vector3(vecdir.x, vecdir.y, vecdir.z));
 		}
 	}
