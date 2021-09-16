@@ -17,5 +17,10 @@ public class CameraController : MonoBehaviour
 			transform.position = new Vector3(tracking.transform.position.x, transform.position.y, tracking.transform.position.z);
 		}
 		transform.Translate(0, 0, Input.mouseScrollDelta.y);
+		if(transform.position.y < 5)
+		{
+			float amount = 5 - transform.position.y;
+			transform.Translate(0, 0, -amount);
+		}
 	}
 }

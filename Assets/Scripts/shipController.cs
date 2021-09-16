@@ -91,6 +91,7 @@ public class shipController : MonoBehaviour
 		ui.transform.GetChild(3).eulerAngles = new Vector3(0, ang, 0);
 		ui.GetComponentInChildren<Slider>().value = Mathf.Max(10,(vel.magnitude* vel.magnitude / 2) +10);
 		ui.transform.GetChild(4).GetComponentInChildren<Text>().text = "" + vel.magnitude.ToString("N") + "u/s";
+		ui.transform.GetChild(4).eulerAngles = Vector3.zero;
 	}
 
 	private void stabilityAssist()
