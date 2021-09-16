@@ -90,6 +90,7 @@ public class shipController : MonoBehaviour
 		float ang = Mathf.Rad2Deg * Mathf.Atan2(vel.x, vel.y);
 		ui.transform.GetChild(3).eulerAngles = new Vector3(0, ang, 0);
 		ui.GetComponentInChildren<Slider>().value = Mathf.Max(10,(vel.magnitude* vel.magnitude / 2) +10);
+		ui.transform.GetChild(4).GetComponentInChildren<Text>().text = "" + vel.magnitude.ToString("N") + "u/s";
 	}
 
 	private void stabilityAssist()

@@ -11,6 +11,7 @@ public class projectileLauncher : MonoBehaviour
 	public void shoot()
 	{
 		GameObject bullet = Instantiate(projectile, transform);
+		bullet.GetComponent<Rigidbody>().velocity = transform.parent.GetComponent<Rigidbody>().velocity;
 		bullet.GetComponent<Rigidbody>().AddForce(bullet.transform.up * impulseMagnitude, ForceMode.Impulse);
 		bullets.Enqueue((Time.realtimeSinceStartup, bullet));
 
