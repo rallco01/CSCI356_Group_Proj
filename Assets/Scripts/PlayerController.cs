@@ -4,32 +4,13 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-	private Vector3 rot;
-
-	public float thrust = 10;
-	public float throttle = 100;
-	public float throttleResponse = 10;
-	public float rspeed = 10;
-	public float cameraHeight = 10;
-	//public float rcon = 10;
-	public bool stabass = false;
-	public float stabassAngle;
-
-	public float P=1;
-	public float I=1;
-	public float D=1;
-	private float lastAV = 0;
-
-
-	private GameObject boi;
-
-	private bool wasStabAss = false;
-
+	private shipController sc = null;
 	private projectileLauncher pl = null;
 
 	private void Start()
 	{
 		pl = gameObject.GetComponentInChildren<projectileLauncher>();
+		sc = gameObject.GetComponentInChildren<shipController>();
 	}
 
 	void Update()
@@ -38,119 +19,84 @@ public class PlayerController : MonoBehaviour
 		float z = 0;
 		float x = 0;
 		float r = 0;
+		float tr = 0;
 		bool kpress = false;
 
 		if (Input.GetKey(KeyCode.LeftShift))
 		{
-			throttle += throttleResponse * t;
-			if (throttle > 100)
-			{
-				throttle = 100;
-			}
+			tr += t;
+			kpress = true;
 		}
 
 		if (Input.GetKey(KeyCode.LeftControl))
 		{
-			throttle -= throttleResponse * t;
-			if(throttle < 0)
-			{
-				throttle = 0;
-			}
+			tr -= t;
+			kpress = true;
 		}
 
 		if (Input.GetKey(KeyCode.W))
 		{
-			z += throttle * t * thrust;
+			z += t;
 			kpress = true;
 		}
 
 		if (Input.GetKey(KeyCode.S))
 		{
-			z -= throttle * t * thrust;
+			z -= t;
 			kpress = true;
 		}
 
 		if (Input.GetKey(KeyCode.A))
 		{
-			x -= throttle * t * thrust;
+			x -= t;
 			kpress = true;
 		}
 
 		if (Input.GetKey(KeyCode.D))
 		{
-			x += throttle * t * thrust;
+			x += t;
 			kpress = true;
 		}
 
 		if (Input.GetKey(KeyCode.Q))
 		{
-			r -= rspeed * t;
+			r -= t;
 			kpress = true;
-		}
-
-		if(Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Q))
-		{
-			if(stabass)
-			{
-				wasStabAss = true;
-				stabass = false;
-			}
 		}
 
 		if (Input.GetKey(KeyCode.E))
 		{
-			r += rspeed * t;
+			r += t;
 			kpress = true;
-		}
-
-		if ((Input.GetKeyUp(KeyCode.E) && !Input.GetKeyDown(KeyCode.Q)) || (Input.GetKeyUp(KeyCode.Q) && !Input.GetKeyDown(KeyCode.E)))
-		{
-			if (wasStabAss)
-			{
-				wasStabAss = false;
-				stabass = true;
-				stabassAngle = transform.eulerAngles.y;
-			}
 		}
 
 		if (Input.GetKeyDown(KeyCode.T))
 		{
-			stabassAngle = transform.eulerAngles.y;
-			stabass = !stabass;
+			sc.setStabass(!sc.stabass);
 		}
 
-		if(Input.GetMouseButtonDown(1))
+		if(Input.GetMouseButtonDown(0))
 		{
 			pl.shoot();
 		}
 
+		if(Input.GetMouseButton(1))
+		{
+			Vector3 mp = Input.mousePosition;
+			mp.z = Camera.main.transform.position.y;
+			Vector3 wp = Camera.main.ScreenToWorldPoint(mp);
+			Vector3 sp = transform.position;
+			float angle = Mathf.Rad2Deg * Mathf.Atan2(wp.x - sp.x, wp.z - sp.z); ;
+			Vector3 ang = Vector3.zero;
+			ang.y = angle;
+			sc.pointAt(ang);
+		}
+
 		if (kpress)
 		{
-			gameObject.GetComponent<Rigidbody>().AddRelativeForce(x, 0, z);
-			rot.y += r;
-			gameObject.GetComponent<Rigidbody>().AddRelativeTorque(0, r, 0);
-		}
-		
-		if (stabass)
-		{
-			float p = -gameObject.GetComponent<Rigidbody>().angularVelocity.y;
-			float i = stabassAngle - gameObject.transform.eulerAngles.y;
-
-			if(Mathf.Abs(i) > 180)
-			{
-				i -= 180;
-				i *= -1;
-			}
-
-			//Debug.Log(i);
-
-			float d = -(gameObject.GetComponent<Rigidbody>().angularVelocity.y-lastAV) / t;
-
-			float PID = P * p + D * d + I*i;
-
-			//Debug.Log(PID);
-
-			gameObject.GetComponent<Rigidbody>().AddRelativeTorque(0, PID, 0);
+			sc.setThrottle(tr);
+			sc.thrustIn(new Vector3(x, 0, z));
+			sc.rotate(new Vector3(0, r, 0));
 		}
 	}
 }
