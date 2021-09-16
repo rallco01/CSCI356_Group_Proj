@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class shipController : MonoBehaviour
 {
@@ -18,6 +19,16 @@ public class shipController : MonoBehaviour
 	private float lastAV = 0;
 
 	private GameObject boi;
+
+	private GameObject camera;
+
+	private GameObject ui;
+
+	public void Start()
+	{
+		ui = transform.Find("ShipUI").gameObject;
+		camera = Camera.main.gameObject;
+	}
 
 	public void setStabass(bool stabass)
 	{
@@ -63,12 +74,26 @@ public class shipController : MonoBehaviour
 
 	public void pointAt(Vector3 rot)
 	{
-		//stabassAngle = rot.y;
+		stabassAngle = rot.y;
 	}
 
-	private void Update()
+	private void updateUI()
 	{
-		float t = Time.deltaTime;
+		float scale = Mathf.Log(camera.transform.position.y, 3) - 2;
+		if (scale < 1)
+		{
+			scale = 1;
+		}
+		ui.transform.localScale = new Vector3(scale, scale, scale);
+
+		Vector2 vel = new Vector2(transform.GetComponent<Rigidbody>().velocity.x, transform.GetComponent<Rigidbody>().velocity.z);
+		float ang = Mathf.Rad2Deg * Mathf.Atan2(vel.x, vel.y);
+		ui.transform.GetChild(3).eulerAngles = new Vector3(0, ang, 0);
+		ui.GetComponentInChildren<Slider>().value = Mathf.Max(10,(vel.magnitude* vel.magnitude / 2) +10);
+	}
+
+	private void stabilityAssist()
+	{
 		/* Stability Assist:
 		 * Because the rotation of the ship is controlled through physics
 		 * there needs to be a physics based way to maintain a heading.
@@ -85,6 +110,7 @@ public class shipController : MonoBehaviour
 		 *  
 		 *  Derivative (d): The derivity of velocity is accelleration.
 		 */
+		float t = Time.deltaTime;
 		if (stabass)
 		{
 			float p = -gameObject.GetComponent<Rigidbody>().angularVelocity.y;
@@ -106,5 +132,11 @@ public class shipController : MonoBehaviour
 
 			gameObject.GetComponent<Rigidbody>().AddRelativeTorque(0, PID, 0);
 		}
+	}
+
+	private void Update()
+	{
+		updateUI();
+		stabilityAssist();
 	}
 }

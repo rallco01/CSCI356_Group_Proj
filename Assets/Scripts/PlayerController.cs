@@ -72,21 +72,28 @@ public class PlayerController : MonoBehaviour
 
 		if (Input.GetKeyDown(KeyCode.T))
 		{
-			//sc.pointAt(transform.eulerAngles);
-			//sc.stabass = !sc.stabass;
 			sc.setStabass(!sc.stabass);
 		}
 
 		if(Input.GetMouseButtonDown(0))
 		{
-			//pl.shoot();
+			pl.shoot();
+		}
+
+		if(Input.GetMouseButton(1))
+		{
+			Vector3 mp = Input.mousePosition;
+			mp.z = Camera.main.transform.position.y;
+			Vector3 wp = Camera.main.ScreenToWorldPoint(mp);
+			Vector3 sp = transform.position;
+			float angle = Mathf.Rad2Deg * Mathf.Atan2(wp.x - sp.x, wp.z - sp.z); ;
+			Vector3 ang = Vector3.zero;
+			ang.y = angle;
+			sc.pointAt(ang);
 		}
 
 		if (kpress)
 		{
-			gameObject.GetComponent<Rigidbody>().AddRelativeForce(x, 0, z);
-			//rot.y += r;
-			//gameObject.GetComponent<Rigidbody>().AddRelativeTorque(0, r, 0);
 			sc.setThrottle(tr);
 			sc.thrustIn(new Vector3(x, 0, z));
 			sc.rotate(new Vector3(0, r, 0));
