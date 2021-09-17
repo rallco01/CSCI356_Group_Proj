@@ -7,6 +7,7 @@ public class shipController : MonoBehaviour
 {
 	public float thrust = 10;
 	public float throttle = 100;
+	public float throttleMax = 100;
 	public float throttleResponse = 10;
 	public float rspeed = 300;
 
@@ -15,6 +16,11 @@ public class shipController : MonoBehaviour
 	public float D = 0.01f;
 	public bool stabass = false;
 	public float stabassAngle;
+
+	public Vector3 destPoint;
+	private Vector3 lastVel = Vector3.zero;
+	private bool movingToPoint = false;
+	public bool moveToPoint = false;
 
 	private float lastAV = 0;
 
@@ -56,7 +62,7 @@ public class shipController : MonoBehaviour
 	public void setThrottle(float throt)
 	{
 		throttle += throt * throttleResponse;
-		if (throttle > 100)
+		if (throttle > throttleMax)
 		{
 			throttle = 100;
 		}
@@ -88,7 +94,41 @@ public class shipController : MonoBehaviour
 
 	public void strafeToPoint(Vector3 point)
 	{
+		destPoint = point;
+	}
 
+	private void pointStrafer()
+	{
+		if (moveToPoint)
+		{
+			if (gameObject.GetComponent<Rigidbody>().velocity.magnitude < 0.0001 && (destPoint-gameObject.transform.position).magnitude < 1)
+			{
+				movingToPoint = false;
+			}else{
+				movingToPoint = true;
+			}
+			if (movingToPoint && destPoint != null)
+			{
+				float mP = 2;
+				float mI = 1;
+				float mD = 0.00f;
+
+				Vector3 p = -gameObject.GetComponent<Rigidbody>().velocity;
+				Vector3 i = destPoint - gameObject.transform.position;
+				Vector3 d = -(gameObject.GetComponent<Rigidbody>().velocity - lastVel) / Time.deltaTime;
+
+				Vector3 PID = mP * p + mI * i + mD * d;
+
+				float maxT = thrust * throttleMax * Time.deltaTime;
+				float minT = -maxT;
+
+				PID.x = Mathf.Clamp(PID.x, minT, maxT);
+				PID.y = Mathf.Clamp(PID.y, minT, maxT);
+				PID.z = Mathf.Clamp(PID.z, minT, maxT);
+
+				gameObject.GetComponent<Rigidbody>().AddForce(PID);
+			}
+		}
 	}
 
 	private void updateUI()
@@ -108,7 +148,7 @@ public class shipController : MonoBehaviour
 		ui.transform.GetChild(4).eulerAngles = Vector3.zero;
 	}
 
-	private void stabilityAssist()
+	private void stabilityAssistant()
 	{
 		/* Stability Assist:
 		 * Because the rotation of the ship is controlled through physics
@@ -152,7 +192,8 @@ public class shipController : MonoBehaviour
 
 	private void Update()
 	{
+		stabilityAssistant();
+		pointStrafer();
 		updateUI();
-		stabilityAssist();
 	}
 }
