@@ -72,9 +72,23 @@ public class shipController : MonoBehaviour
 		gameObject.GetComponent<Rigidbody>().AddRelativeForce(dir);
 	}
 
-	public void pointAt(Vector3 rot)
+	// points the ship to an angle
+	public void pointTo(Vector3 rot)
 	{
 		stabassAngle = rot.y;
+	}
+
+	// points the ship at a point
+	public void pointAt(Vector3 point)
+	{
+		Vector3 sp = transform.position;
+		float angle = Mathf.Rad2Deg * Mathf.Atan2(point.x - sp.x, point.z - sp.z); ;
+		stabassAngle = angle;
+	}
+
+	public void strafeToPoint(Vector3 point)
+	{
+
 	}
 
 	private void updateUI()

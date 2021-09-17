@@ -85,11 +85,7 @@ public class PlayerController : MonoBehaviour
 			Vector3 mp = Input.mousePosition;
 			mp.z = Camera.main.transform.position.y;
 			Vector3 wp = Camera.main.ScreenToWorldPoint(mp);
-			Vector3 sp = transform.position;
-			float angle = Mathf.Rad2Deg * Mathf.Atan2(wp.x - sp.x, wp.z - sp.z); ;
-			Vector3 ang = Vector3.zero;
-			ang.y = angle;
-			sc.pointAt(ang);
+			sc.pointAt(wp);
 		}
 
 		if (kpress)
