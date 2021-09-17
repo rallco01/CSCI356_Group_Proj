@@ -8,19 +8,25 @@ public class shipController : MonoBehaviour
 	public float thrust = 10;
 	public float throttle = 100;
 	public float throttleMax = 100;
+	//public Vector3 thrustVectorsP = new Vector3( 2,  1,  1);
+	//public Vector3 thrustVectorsN = new Vector3( 1,  1,  1);
 	public float throttleResponse = 10;
 	public float rspeed = 300;
 
-	public float P = 1f;
-	public float I = 0.5f;
-	public float D = 0.01f;
+	public float sP = 1f;
+	public float sI = 0.5f;
+	public float sD = 0.01f;
 	public bool stabass = false;
 	public float stabassAngle;
 
 	public Vector3 destPoint;
 	private Vector3 lastVel = Vector3.zero;
+	public float mP = 2f;
+	public float mI = 1f;
+	public float mD = 0f;
 	private bool movingToPoint = false;
 	public bool moveToPoint = false;
+	public bool destReached = false;
 
 	private float lastAV = 0;
 
@@ -29,6 +35,10 @@ public class shipController : MonoBehaviour
 	private GameObject camera;
 
 	private GameObject ui;
+
+	public GameObject markerRef;
+
+	private GameObject marker = null;
 
 	public void Start()
 	{
@@ -75,6 +85,7 @@ public class shipController : MonoBehaviour
 	public void thrustIn(Vector3 dir)
 	{
 		dir *= thrust * throttle;
+
 		gameObject.GetComponent<Rigidbody>().AddRelativeForce(dir);
 	}
 
@@ -92,9 +103,22 @@ public class shipController : MonoBehaviour
 		stabassAngle = angle;
 	}
 
+	public void addDestMarker(Vector3 point)
+	{
+		if (marker == null)
+		{
+			marker = Instantiate(markerRef);
+		}
+		if (marker != null)
+		{
+			marker.transform.position = point;
+		}
+	}
+
 	public void strafeToPoint(Vector3 point)
 	{
 		destPoint = point;
+		destReached = false;
 	}
 
 	private void pointStrafer()
@@ -104,14 +128,19 @@ public class shipController : MonoBehaviour
 			if (gameObject.GetComponent<Rigidbody>().velocity.magnitude < 0.0001 && (destPoint-gameObject.transform.position).magnitude < 1)
 			{
 				movingToPoint = false;
+				destReached = true;
 			}else{
 				movingToPoint = true;
 			}
+			if((destPoint - gameObject.transform.position).magnitude > 0.1)
+			{
+				//pointAt(destPoint);
+			}
 			if (movingToPoint && destPoint != null)
 			{
-				float mP = 2;
-				float mI = 1;
-				float mD = 0.00f;
+				//float mP = 2;
+				//float mI = 1;
+				//float mD = 0.00f;
 
 				Vector3 p = -gameObject.GetComponent<Rigidbody>().velocity;
 				Vector3 i = destPoint - gameObject.transform.position;
@@ -146,6 +175,12 @@ public class shipController : MonoBehaviour
 		ui.GetComponentInChildren<Slider>().value = Mathf.Max(10,(vel.magnitude* vel.magnitude / 2) +10);
 		ui.transform.GetChild(4).GetComponentInChildren<Text>().text = "" + vel.magnitude.ToString("N") + "u/s";
 		ui.transform.GetChild(4).eulerAngles = Vector3.zero;
+
+		if(destReached && marker != null)
+		{
+			Destroy(marker);
+			marker = null;
+		}
 	}
 
 	private void stabilityAssistant()
@@ -184,7 +219,7 @@ public class shipController : MonoBehaviour
 
 			float d = -(gameObject.GetComponent<Rigidbody>().angularVelocity.y - lastAV) / t;
 
-			float PID = P * p + D * d + I * i;
+			float PID = sP * p + sD * d + sI * i;
 
 			gameObject.GetComponent<Rigidbody>().AddRelativeTorque(0, PID, 0);
 		}

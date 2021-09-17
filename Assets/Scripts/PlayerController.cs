@@ -13,11 +13,21 @@ public class PlayerController : MonoBehaviour
 		sc = gameObject.GetComponentInChildren<shipController>();
 	}
 
+	private Vector3 mp;
+	private bool mpdf = false;
+
 	private Vector3 getMousePos()
 	{
-		Vector3 mp = Input.mousePosition;
-		mp.z = Camera.main.transform.position.y;
-		return Camera.main.ScreenToWorldPoint(mp);
+		if (!mpdf)
+		{
+			Vector3 mp = Input.mousePosition;
+			mp.z = Camera.main.transform.position.y;
+			this.mp = Camera.main.ScreenToWorldPoint(mp);
+			mpdf = true;
+			return this.mp;
+		}else{
+			return mp;
+		}
 	}
 
 	void Update()
@@ -96,6 +106,7 @@ public class PlayerController : MonoBehaviour
 		{
 			sc.pointAt(getMousePos());
 			sc.strafeToPoint(getMousePos());
+			sc.addDestMarker(getMousePos());
 		}
 
 		if (kpress)
@@ -104,5 +115,7 @@ public class PlayerController : MonoBehaviour
 			sc.thrustIn(new Vector3(x, 0, z));
 			sc.rotate(new Vector3(0, r, 0));
 		}
+
+		mpdf = false;
 	}
 }
