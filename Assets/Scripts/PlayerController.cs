@@ -13,6 +13,23 @@ public class PlayerController : MonoBehaviour
 		sc = gameObject.GetComponentInChildren<shipController>();
 	}
 
+	private Vector3 mp;
+	private bool mpdf = false;
+
+	private Vector3 getMousePos()
+	{
+		if (!mpdf)
+		{
+			Vector3 mp = Input.mousePosition;
+			mp.z = Camera.main.transform.position.y;
+			this.mp = Camera.main.ScreenToWorldPoint(mp);
+			mpdf = true;
+			return this.mp;
+		}else{
+			return mp;
+		}
+	}
+
 	void Update()
 	{
 		float t = Time.deltaTime;
@@ -82,14 +99,14 @@ public class PlayerController : MonoBehaviour
 
 		if(Input.GetMouseButton(1))
 		{
-			Vector3 mp = Input.mousePosition;
-			mp.z = Camera.main.transform.position.y;
-			Vector3 wp = Camera.main.ScreenToWorldPoint(mp);
-			Vector3 sp = transform.position;
-			float angle = Mathf.Rad2Deg * Mathf.Atan2(wp.x - sp.x, wp.z - sp.z); ;
-			Vector3 ang = Vector3.zero;
-			ang.y = angle;
-			sc.pointAt(ang);
+			sc.pointAt(getMousePos());
+		}
+
+		if(Input.GetMouseButton(2))
+		{
+			sc.pointAt(getMousePos());
+			sc.strafeToPoint(getMousePos());
+			sc.addDestMarker(getMousePos());
 		}
 
 		if (kpress)
@@ -98,5 +115,7 @@ public class PlayerController : MonoBehaviour
 			sc.thrustIn(new Vector3(x, 0, z));
 			sc.rotate(new Vector3(0, r, 0));
 		}
+
+		mpdf = false;
 	}
 }
