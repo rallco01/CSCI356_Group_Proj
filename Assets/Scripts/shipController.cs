@@ -5,12 +5,12 @@ using UnityEngine.UI;
 
 public class shipController : MonoBehaviour
 {
-	public float thrust = 10;
+	public float thrust = 1;
 	public float throttle = 100;
 	public float throttleMax = 100;
 	//public Vector3 thrustVectorsP = new Vector3( 2,  1,  1);
 	//public Vector3 thrustVectorsN = new Vector3( 1,  1,  1);
-	public float throttleResponse = 10;
+	public float throttleResponse = 20;
 	public float rspeed = 300;
 
 	public float sP = 1f;
@@ -40,6 +40,9 @@ public class shipController : MonoBehaviour
 
 	private GameObject marker = null;
 
+	private List<manoeuvreNode> course = new List<manoeuvreNode>();
+	private bool runCourse = false;
+
 	public void Start()
 	{
 		ui = transform.Find("ShipUI").gameObject;
@@ -60,10 +63,10 @@ public class shipController : MonoBehaviour
 			gameObject.GetComponent<Rigidbody>().AddRelativeTorque(rot);
 		} else {
 			stabassAngle += rot.y;
-			if(stabassAngle>=360)
+			if (stabassAngle >= 360)
 			{
 				stabassAngle = stabassAngle % 360;
-			}else if (stabassAngle < 0){
+			} else if (stabassAngle < 0) {
 				stabassAngle += 360;
 			}
 		}
@@ -95,11 +98,16 @@ public class shipController : MonoBehaviour
 		stabassAngle = rot.y;
 	}
 
+	private float ab2p(Vector3 a, Vector3 b)
+	{
+		return Mathf.Rad2Deg * Mathf.Atan2(a.x - b.x, a.z - b.z);
+	}
+
 	// points the ship at a point
 	public void pointAt(Vector3 point)
 	{
 		Vector3 sp = transform.position;
-		float angle = Mathf.Rad2Deg * Mathf.Atan2(point.x - sp.x, point.z - sp.z); ;
+		float angle = ab2p(point, sp);
 		stabassAngle = angle;
 	}
 
@@ -125,30 +133,41 @@ public class shipController : MonoBehaviour
 	{
 		if (moveToPoint)
 		{
-			if (gameObject.GetComponent<Rigidbody>().velocity.magnitude < 0.0001 && (destPoint-gameObject.transform.position).magnitude < 1)
+			if (gameObject.GetComponent<Rigidbody>().velocity.magnitude < 0.0001 && (destPoint - gameObject.transform.position).magnitude < 1)
 			{
 				movingToPoint = false;
 				destReached = true;
-			}else{
+			} else {
 				movingToPoint = true;
 			}
-			if((destPoint - gameObject.transform.position).magnitude > 0.1)
+			if ((destPoint - gameObject.transform.position).magnitude > 0.1)
 			{
 				//pointAt(destPoint);
 			}
 			if (movingToPoint && destPoint != null)
 			{
-				//float mP = 2;
-				//float mI = 1;
-				//float mD = 0.00f;
+				Vector3 vel = gameObject.GetComponent<Rigidbody>().velocity;
 
-				Vector3 p = -gameObject.GetComponent<Rigidbody>().velocity;
-				Vector3 i = destPoint - gameObject.transform.position;
-				Vector3 d = -(gameObject.GetComponent<Rigidbody>().velocity - lastVel) / Time.deltaTime;
+				//Vector3 vv = vel.normalized;
+				Vector3 hv = (destPoint - transform.position).normalized;
+
+				Vector3 p = -(vel); //+ (vv-hv)*0);
+
+				float dist = Vector3.Distance(destPoint, gameObject.transform.position);
+				Vector3 i = hv;
+				float wackfac = 50;
+				if (dist > wackfac)
+				{
+					dist = wackfac + (wackfac / dist);
+				}
+				i *= dist;
+
+				Vector3 d = -(vel - lastVel) / Time.deltaTime;
+				lastVel = vel;
 
 				Vector3 PID = mP * p + mI * i + mD * d;
 
-				float maxT = thrust * throttleMax * Time.deltaTime;
+				float maxT = thrust * throttleMax;
 				float minT = -maxT;
 
 				PID.x = Mathf.Clamp(PID.x, minT, maxT);
@@ -172,11 +191,11 @@ public class shipController : MonoBehaviour
 		Vector2 vel = new Vector2(transform.GetComponent<Rigidbody>().velocity.x, transform.GetComponent<Rigidbody>().velocity.z);
 		float ang = Mathf.Rad2Deg * Mathf.Atan2(vel.x, vel.y);
 		ui.transform.GetChild(3).eulerAngles = new Vector3(0, ang, 0);
-		ui.GetComponentInChildren<Slider>().value = Mathf.Max(10,(vel.magnitude* vel.magnitude / 2) +10);
+		ui.GetComponentInChildren<Slider>().value = Mathf.Max(10, (vel.magnitude * vel.magnitude / 2) + 10);
 		ui.transform.GetChild(4).GetComponentInChildren<Text>().text = "" + vel.magnitude.ToString("N") + "u/s";
 		ui.transform.GetChild(4).eulerAngles = Vector3.zero;
 
-		if(destReached && marker != null)
+		if (destReached && marker != null)
 		{
 			Destroy(marker);
 			marker = null;
@@ -225,10 +244,191 @@ public class shipController : MonoBehaviour
 		}
 	}
 
+	public void setCourse(List<manoeuvreNode> nodes)
+	{
+		course = nodes;
+		runCourse = true;
+	}
+
+	public void setCourse()
+	{
+		runCourse = true;
+		for(int i = 0;i< course.Count-1; i++)
+		{
+			course[i].velVec = (course[i + 1].pos - course[i].pos).normalized;
+		}
+	}
+
+	public void clearNodes()
+	{
+		foreach(manoeuvreNode node in course)
+		{
+			Destroy(node.marker);
+		}
+		course.Clear();
+	}
+
+	public void accNodes(manoeuvreNode node)
+	{
+		runCourse = false;
+		node.setMarker(Instantiate(markerRef));
+		course.Add(node);
+	}
+
+	private void strafeToNode1(manoeuvreNode node)
+	{
+		Vector3 vel = gameObject.GetComponent<Rigidbody>().velocity;
+
+		//Vector3 vv = vel.normalized;
+		Vector3 hv = (node.pos - transform.position).normalized;
+		float dist = Vector3.Distance(node.pos, gameObject.transform.position);
+		Vector3 p = -(vel);
+
+		Vector3 i = hv*dist;
+
+		Vector3 d = -(vel - lastVel) / Time.deltaTime;
+		lastVel = vel;
+
+		Vector3 PID = mP * p + mI * i + mD * d;
+
+		float maxT = thrust * throttleMax;
+		float minT = -maxT;
+
+		PID.x = Mathf.Clamp(PID.x, minT, maxT);
+		PID.y = Mathf.Clamp(PID.y, minT, maxT);
+		PID.z = Mathf.Clamp(PID.z, minT, maxT);
+
+		gameObject.GetComponent<Rigidbody>().AddForce(PID);
+	}
+
+	private void strafeToNode2(manoeuvreNode node)
+	{
+		Rigidbody rb = GetComponent<Rigidbody>();
+		float maxT = thrust * throttleMax;
+		float minT = -maxT;
+
+		// Position vectors
+		Vector3 aPos = rb.position;
+		Vector3 tPos = node.pos;
+		float dist = Vector3.Distance(tPos,aPos);
+
+		// Velocity vectors
+		Vector3 aVel = rb.velocity;
+		Vector3 tVel = node.vel;
+
+		// Velocity Vector vectors
+		Vector3 aVeV = aVel.normalized;
+		Vector3 tVeV = (tPos - aPos).normalized;
+
+		//Error in position
+		float wackfacd = 50;
+		float wackDist = dist;
+		if (wackDist > wackfacd)
+		{
+			wackDist = wackfacd + (wackfacd / dist);
+		}
+		Vector3 ePos = tVeV * wackDist * mI;
+
+		//Error in velocity
+		Vector3 eVel = tVel - aVel * mP;
+
+		Vector3 PID = ePos + eVel;
+
+		PID.x = Mathf.Clamp(PID.x, minT, maxT);
+		PID.y = Mathf.Clamp(PID.y, minT, maxT);
+		PID.z = Mathf.Clamp(PID.z, minT, maxT);
+
+		gameObject.GetComponent<Rigidbody>().AddForce(PID);
+	}
+
+	private void strafeToNode(manoeuvreNode node)
+	{
+		Vector3 vel = gameObject.GetComponent<Rigidbody>().velocity;
+
+		//Vector3 vv = vel.normalized;
+		Vector3 hv = (node.pos - transform.position).normalized;
+		float dist = Vector3.Distance(node.pos, gameObject.transform.position);
+
+		float wackatk = 1;
+
+		if(dist > 20)
+		{
+			wackatk = 1 / dist;
+		}
+
+		if(vel.magnitude > 20 && dist < 40)
+		{
+			wackatk = vel.magnitude;
+		}
+
+		Vector3 p = -(vel*wackatk);
+
+		Vector3 i = hv;
+		float wackfac = 50;
+		if (dist > wackfac)
+		{
+			dist = wackfac + (wackfac / dist);
+		}
+		i *= dist;
+
+		Vector3 d = -(vel - lastVel) / Time.deltaTime;
+		lastVel = vel;
+
+		Vector3 PID = mP * p + mI * i + mD * d;
+
+		float maxT = thrust * throttleMax;
+		float minT = -maxT;
+
+		PID.x = Mathf.Clamp(PID.x, minT, maxT);
+		PID.y = Mathf.Clamp(PID.y, minT, maxT);
+		PID.z = Mathf.Clamp(PID.z, minT, maxT);
+
+		gameObject.GetComponent<Rigidbody>().AddForce(PID);
+	}
+
+	private void flyToNode(manoeuvreNode node)
+	{
+		strafeToNode2(node);
+	}
+
+	private void flyCourse()
+	{
+		if(course != null)
+		{
+			if(course.Count > 0 && runCourse)
+			{
+				Rigidbody shipRB = GetComponent<Rigidbody>();
+				float vel = 0.001f;
+				if(course.Count > 1)
+				{
+					vel = 2;
+				}
+				if (course[0].isReached(shipRB, vel))
+				{
+					Destroy(course[0].marker);
+					course.RemoveAt(0);
+				}else{
+					flyToNode(course[0]);
+				}
+				return;
+			}
+		}
+		//stabilityAssistant();
+	}
+
+	private void FixedUpdate()
+	{
+		stabilityAssistant();
+		//pointStrafer();
+		flyCourse();
+		updateUI();
+	}
+
 	private void Update()
 	{
 		stabilityAssistant();
-		pointStrafer();
+		//pointStrafer();
+		flyCourse();
 		updateUI();
 	}
 }
