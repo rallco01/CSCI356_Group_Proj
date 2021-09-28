@@ -27,15 +27,11 @@ public class gravity : MonoBehaviour
 
 			// modified equation of universal gravitation
 			vecdir *= boi.transform.localScale.magnitude* boi.GetComponent<planetScript>().mass*thing.GetComponent<Rigidbody>().mass;
-<<<<<<< HEAD
-			vecdir = (vecdir / (vec.magnitude)) * 0.000000000667430f;	//Could this be made a variable rather than a static float, so that we can edit it in the inspector, and change it for different objects
-=======
 			vecdir = (vecdir / (vec.magnitude)) * G;
 
 			// true equation of universal gravitation
 			//vecdir *= boi.GetComponent<planetScript>().mass * thing.GetComponent<Rigidbody>().mass;
 			//vecdir = (vecdir / (vec.magnitude*vec.magnitude)) * G;
->>>>>>> 08821f6e43a26ef3e9fd37d9f253cee3e06f0af2
 			gameObject.GetComponent<Rigidbody>().AddForce(new Vector3(vecdir.x, vecdir.y, vecdir.z));
 		}
 	}
