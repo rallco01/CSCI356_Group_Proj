@@ -430,5 +430,9 @@ public class shipController : MonoBehaviour
 		//pointStrafer();
 		flyCourse();
 		updateUI();
+		//drawLineToDest();
+		//drawPathToPoint();
+		//temporary thing
+		//gameObject.transform.GetChild(3).position  = gameObject.transform.position;
 	}
 }
