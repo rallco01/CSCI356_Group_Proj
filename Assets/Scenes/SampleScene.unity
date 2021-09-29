@@ -1342,17 +1342,20 @@ MonoBehaviour:
   thrust: 10
   throttle: 100
   throttleMax: 100
-  thrustVectorsP: {x: 2, y: 1, z: 1}
-  thrustVectorsN: {x: 1, y: 1, z: 1}
   throttleResponse: 10
   rspeed: 200
-  P: 1
-  I: 0.5
-  D: 0.01
+  sP: 1
+  sI: 0.5
+  sD: 0.01
   stabass: 1
   stabassAngle: 0
   destPoint: {x: 0, y: 0, z: 0}
-  moveToPoint: 1
+  mP: 2
+  mI: 1
+  mD: 0
+  moveToPoint: 0
+  destReached: 0
+  markerRef: {fileID: 0}
 --- !u!114 &945938218
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2383,20 +2386,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c49589bc03936548913620b5daa44ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  thrust: 10
+  thrust: 0.1
   throttle: 100
   throttleMax: 100
-  thrustVectorsP: {x: 2, y: 1, z: 1}
-  thrustVectorsN: {x: 1, y: 1, z: 1}
-  throttleResponse: 10
+  throttleResponse: 20
   rspeed: 200
-  P: 1
-  I: 0.5
-  D: 0.01
+  sP: 1
+  sI: 0.5
+  sD: 0.01
   stabass: 1
   stabassAngle: 0
   destPoint: {x: 0, y: 0, z: 0}
+  mP: 2
+  mI: 1
+  mD: 0
   moveToPoint: 1
+  destReached: 0
+  markerRef: {fileID: 373177425339341985, guid: a104e3be861f4f7488b7584249921bf1,
+    type: 3}
 --- !u!114 &919132147669889550
 MonoBehaviour:
   m_ObjectHideFlags: 0

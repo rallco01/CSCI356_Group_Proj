@@ -244,17 +244,6 @@ public class shipController : MonoBehaviour
 		}
 	}
 
-<<<<<<< HEAD
-	/*DEBUG STUFFS*/
-	private void drawLineToDest() {
-		Debug.DrawLine(gameObject.transform.position, destPoint, Color.white);
-	}
-	private void drawPathToPoint() {
-		gameObject.transform.GetChild(3).GetComponent<ShowGoldenPath>().updateDestination(destPoint);
-		//NavMeshAgent.GetComponent<ShowGoldenPath>().updateDestination(destPoint);
-	}
-
-=======
 	public void setCourse(List<manoeuvreNode> nodes)
 	{
 		course = nodes;
@@ -434,7 +423,6 @@ public class shipController : MonoBehaviour
 		flyCourse();
 		updateUI();
 	}
->>>>>>> 9d5bd382826b10d485e968fbc8793a471e3447b9
 
 	private void Update()
 	{
@@ -442,9 +430,9 @@ public class shipController : MonoBehaviour
 		//pointStrafer();
 		flyCourse();
 		updateUI();
-		drawLineToDest();
-		drawPathToPoint();
+		//drawLineToDest();
+		//drawPathToPoint();
 		//temporary thing
-		gameObject.transform.GetChild(3).position  = gameObject.transform.position;
+		//gameObject.transform.GetChild(3).position  = gameObject.transform.position;
 	}
 }

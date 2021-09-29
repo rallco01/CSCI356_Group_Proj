@@ -23,6 +23,7 @@ public class PlayerController : MonoBehaviour
 			Vector3 mp = Input.mousePosition;
 			mp.z = Camera.main.transform.position.y;
 			this.mp = Camera.main.ScreenToWorldPoint(mp);
+			this.mp.y = 0;
 			mpdf = true;
 			return this.mp;
 		}else{
@@ -38,6 +39,8 @@ public class PlayerController : MonoBehaviour
 		float r = 0;
 		float tr = 0;
 		bool kpress = false;
+		bool clearC = false;
+
 
 		if (Input.GetKey(KeyCode.LeftShift))
 		{
@@ -53,26 +56,30 @@ public class PlayerController : MonoBehaviour
 
 		if (Input.GetKey(KeyCode.W))
 		{
-			z += t;
+			z += 1;
 			kpress = true;
+			clearC = true;
 		}
 
 		if (Input.GetKey(KeyCode.S))
 		{
-			z -= t;
+			z -= 1;
 			kpress = true;
+			clearC = true;
 		}
 
 		if (Input.GetKey(KeyCode.A))
 		{
-			x -= t;
+			x -= 1;
 			kpress = true;
+			clearC = true;
 		}
 
 		if (Input.GetKey(KeyCode.D))
 		{
-			x += t;
+			x += 1;
 			kpress = true;
+			clearC = true;
 		}
 
 		if (Input.GetKey(KeyCode.Q))
@@ -102,11 +109,25 @@ public class PlayerController : MonoBehaviour
 			sc.pointAt(getMousePos());
 		}
 
-		if(Input.GetMouseButton(2))
+		if(Input.GetMouseButtonDown(2)&&!Input.GetKey(KeyCode.LeftAlt))
 		{
-			sc.pointAt(getMousePos());
-			sc.strafeToPoint(getMousePos());
-			sc.addDestMarker(getMousePos());
+			sc.clearNodes();
+			manoeuvreNode node = new manoeuvreNode();
+			node.pos = getMousePos();
+			sc.accNodes(node);
+			sc.setCourse();
+		}
+
+		if(Input.GetKey(KeyCode.LeftAlt) && Input.GetMouseButtonDown(2))
+		{
+			manoeuvreNode node = new manoeuvreNode();
+			node.pos = getMousePos();
+			sc.accNodes(node);
+		}
+
+		if(Input.GetKeyUp(KeyCode.LeftAlt))
+		{
+			sc.setCourse();
 		}
 
 		if (kpress)
@@ -114,6 +135,11 @@ public class PlayerController : MonoBehaviour
 			sc.setThrottle(tr);
 			sc.thrustIn(new Vector3(x, 0, z));
 			sc.rotate(new Vector3(0, r, 0));
+		}
+
+		if(clearC)
+		{
+			sc.clearNodes();
 		}
 
 		mpdf = false;
