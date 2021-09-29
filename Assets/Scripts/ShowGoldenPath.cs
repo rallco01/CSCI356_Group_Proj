@@ -4,26 +4,26 @@ using UnityEngine.AI;
 
 public class ShowGoldenPath : MonoBehaviour
 {
-    public Transform target;
+    public Vector3 destination;
+
+    public NavMeshAgent agent;
     private NavMeshPath path;
-    private float elapsed = 0.0f;
-    void Start()
-    {
-        path = new NavMeshPath();
-        elapsed = 0.0f;
+
+    void start() {
     }
 
-    void Update()
-    {
-        // Update the way to the goal every second.
-        elapsed += Time.deltaTime;
-        if (elapsed > 1.0f)
-        {
-            elapsed -= 1.0f;
-            NavMesh.CalculatePath(transform.position, target.position, NavMesh.AllAreas, path);
-        }
-        for (int i = 0; i < path.corners.Length - 1; i++)
-            print(path.corners[i]);
-            //Debug.DrawLine(path.corners[i], path.corners[i + 1], Color.red);
+    public void updateDestination(Vector3 dest) {
+        destination = dest;
     }
+
+    void Update() {
+        agent.SetDestination(destination);
+        path = agent.path;
+
+        //show the path of the nav mesh agent
+        for (int i = 0; i < path.corners.Length - 1; i++)
+            Debug.DrawLine(path.corners[i], path.corners[i + 1], Color.red);
+    }
+
+    
 }

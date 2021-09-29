@@ -225,10 +225,24 @@ public class shipController : MonoBehaviour
 		}
 	}
 
+	/*DEBUG STUFFS*/
+	private void drawLineToDest() {
+		Debug.DrawLine(gameObject.transform.position, destPoint, Color.white);
+	}
+	private void drawPathToPoint() {
+		gameObject.transform.GetChild(3).GetComponent<ShowGoldenPath>().updateDestination(destPoint);
+		//NavMeshAgent.GetComponent<ShowGoldenPath>().updateDestination(destPoint);
+	}
+
+
 	private void Update()
 	{
 		stabilityAssistant();
 		pointStrafer();
 		updateUI();
+		drawLineToDest();
+		drawPathToPoint();
+		//temporary thing
+		gameObject.transform.GetChild(3).position  = gameObject.transform.position;
 	}
 }
