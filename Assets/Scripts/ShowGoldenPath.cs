@@ -1,4 +1,4 @@
-﻿// ShowGoldenPath
+﻿//Generate Path
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -12,8 +12,9 @@ public class ShowGoldenPath : MonoBehaviour
     void start() {
     }
 
-    public void updateDestination(Vector3 dest) {
-        destination = dest;
+    void drawPath() {
+        for (int i = 0; i < path.corners.Length - 1; i++)
+            Debug.DrawLine(path.corners[i], path.corners[i + 1], Color.red);
     }
 
     void Update() {
@@ -21,9 +22,14 @@ public class ShowGoldenPath : MonoBehaviour
         path = agent.path;
 
         //show the path of the nav mesh agent
-        for (int i = 0; i < path.corners.Length - 1; i++)
-            Debug.DrawLine(path.corners[i], path.corners[i + 1], Color.red);
+        drawPath();
     }
 
-    
+    public void updateDestination(Vector3 dest) {
+        destination = dest;
+    }
+
+    public NavMeshPath getPath() {
+        return path;
+    }
 }

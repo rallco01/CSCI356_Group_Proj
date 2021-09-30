@@ -109,6 +109,7 @@ public class PlayerController : MonoBehaviour
 			sc.pointAt(getMousePos());
 		}
 
+		/*
 		if(Input.GetMouseButtonDown(2)&&!Input.GetKey(KeyCode.LeftAlt))
 		{
 			sc.clearNodes();
@@ -128,6 +129,21 @@ public class PlayerController : MonoBehaviour
 		if(Input.GetKeyUp(KeyCode.LeftAlt))
 		{
 			sc.setCourse();
+		}
+		*/
+		// new movement method
+
+		if(Input.GetMouseButtonDown(2)) {
+			//clear the path
+			sc.clearNodes();
+			// update the destination point for the nav mesh agent
+			gameObject.transform.GetChild(3).GetComponent<ShowGoldenPath>().updateDestination(getMousePos());
+			// set the course of the ship
+			sc.setCourse();
+		}
+
+		if(Input.GetKey(KeyCode.Space)) {
+			sc.clearNodes();
 		}
 
 		if (kpress)

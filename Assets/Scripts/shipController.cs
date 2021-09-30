@@ -252,11 +252,29 @@ public class shipController : MonoBehaviour
 
 	public void setCourse()
 	{
+		/*
 		runCourse = true;
 		for(int i = 0;i< course.Count-1; i++)
 		{
 			course[i].velVec = (course[i + 1].pos - course[i].pos).normalized;
 		}
+		*/
+
+		// Get Path
+		UnityEngine.AI.NavMeshPath path = gameObject.transform.GetChild(3).GetComponent<ShowGoldenPath>().getPath();
+		// loop through all corners of the path, create node and pass it to accNodes
+		for (int i = 0; i < path.corners.Length; i++) {
+			manoeuvreNode node = new manoeuvreNode();
+			node.pos = path.corners[i];
+			accNodes(node);
+		}
+		// start course?
+		runCourse = true;
+		for(int i = 0;i< course.Count-1; i++)
+		{
+			course[i].velVec = (course[i + 1].pos - course[i].pos).normalized;
+		}
+		
 	}
 
 	public void clearNodes()
@@ -388,6 +406,7 @@ public class shipController : MonoBehaviour
 
 	private void flyToNode(manoeuvreNode node)
 	{
+		pointAt(node.pos);
 		strafeToNode2(node);
 	}
 
@@ -433,6 +452,6 @@ public class shipController : MonoBehaviour
 		//drawLineToDest();
 		//drawPathToPoint();
 		//temporary thing
-		//gameObject.transform.GetChild(3).position  = gameObject.transform.position;
+		gameObject.transform.GetChild(3).position  = gameObject.transform.position;
 	}
 }
