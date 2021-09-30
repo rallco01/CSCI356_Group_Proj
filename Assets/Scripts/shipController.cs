@@ -236,7 +236,7 @@ public class shipController : MonoBehaviour
 				i -= 360;
 			}
 
-			float d = -(gameObject.GetComponent<Rigidbody>().angularVelocity.y - lastAV) / t;
+			float d = 0;// -(gameObject.GetComponent<Rigidbody>().angularVelocity.y - lastAV) / t;
 
 			float PID = sP * p + sD * d + sI * i;
 
@@ -437,10 +437,10 @@ public class shipController : MonoBehaviour
 
 	private void FixedUpdate()
 	{
-		stabilityAssistant();
+		//stabilityAssistant();
 		//pointStrafer();
-		flyCourse();
-		updateUI();
+		//flyCourse();
+		//updateUI();
 	}
 
 	private void Update()
