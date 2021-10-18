@@ -231,6 +231,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mass: 1e+10
+--- !u!208 &158045481
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 158045475}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 0
+  m_Extents: {x: 0.5, y: 2.5, z: 0.5}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0, z: 0}
+  m_TimeToStationary: 0.5
 --- !u!1 &167719177
 GameObject:
   m_ObjectHideFlags: 0
@@ -413,22 +429,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 232899000}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!208 &158045481
-NavMeshObstacle:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 158045475}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Shape: 0
-  m_Extents: {x: 0.5, y: 2.5, z: 0.5}
-  m_MoveThreshold: 0.1
-  m_Carve: 1
-  m_CarveOnlyStationary: 1
-  m_Center: {x: 0, y: 0, z: 0}
-  m_TimeToStationary: 0.5
 --- !u!1 &284163635
 GameObject:
   m_ObjectHideFlags: 0
@@ -2391,14 +2391,14 @@ MonoBehaviour:
   throttleMax: 100
   throttleResponse: 20
   rspeed: 200
-  sP: 1
-  sI: 0.5
-  sD: 0.01
+  sP: 5
+  sI: 1
+  sD: 0.1
   stabass: 1
   stabassAngle: 0
   destPoint: {x: 0, y: 0, z: 0}
-  mP: 2
-  mI: 1
+  mP: 10
+  mI: 5
   mD: 0
   moveToPoint: 1
   destReached: 0
@@ -2411,12 +2411,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 919132147669889547}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 79b4ffec4b33fd3478c81b2e6b8c9f61, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {fileID: 339027509}
+  destination: {x: 0, y: 0, z: 0}
+  agent: {fileID: 0}
 --- !u!195 &919132147669889551
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -2424,7 +2425,7 @@ NavMeshAgent:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 919132147669889547}
-  m_Enabled: 1
+  m_Enabled: 0
   m_AgentTypeID: -1372625422
   m_Radius: 0.5
   m_Speed: 3.5

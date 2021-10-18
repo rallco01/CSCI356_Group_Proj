@@ -236,7 +236,7 @@ public class shipController : MonoBehaviour
 				i -= 360;
 			}
 
-			float d = 0;// -(gameObject.GetComponent<Rigidbody>().angularVelocity.y - lastAV) / t;
+			float d = -(gameObject.GetComponent<Rigidbody>().angularVelocity.y - lastAV) / t;
 
 			float PID = sP * p + sD * d + sI * i;
 
@@ -386,14 +386,89 @@ public class shipController : MonoBehaviour
 		gameObject.GetComponent<Rigidbody>().AddForce(PID);
 	}
 
+	private Vector2 rotateVec2(Vector2 v, float theta)
+	{
+		float x = v.x * Mathf.Cos(theta) - v.y * Mathf.Sin(theta);
+		float y = v.x * Mathf.Sin(theta) + v.y * Mathf.Cos(theta);
+		return new Vector2(x, y);
+	}
+
+	private void pointVV(Vector3 dir)
+	{
+		Rigidbody rb = GetComponent<Rigidbody>();
+		float maxT = thrust * throttleMax;
+		float minT = -maxT;
+
+		// Velocity vectors
+		Vector3 aVel = rb.velocity.normalized;
+		Vector3 tVel = dir.normalized;
+
+		Vector3 eVel = tVel - aVel;
+
+		Vector2 vv = rotateVec2(new Vector2(eVel.x, eVel.z),rb.transform.eulerAngles.y).normalized;
+
+		thrustIn(new Vector3(vv.x, 0, vv.y));
+
+		//PID.x = Mathf.Clamp(PID.x, minT, maxT);
+		//PID.y = Mathf.Clamp(PID.y, minT, maxT);
+		//PID.z = Mathf.Clamp(PID.z, minT, maxT);
+
+		//rb.AddForce(PID);
+	}
+
+	private void BachStrafer(manoeuvreNode node)
+	{
+		Rigidbody rb = GetComponent<Rigidbody>();
+		float maxT = thrust * throttleMax;
+		float minT = -maxT;
+
+		float thrustF = thrust * throttle;
+		float acc = thrustF / rb.mass;
+
+		// Position vectors
+		Vector3 aPos = rb.position;
+		Vector3 tPos = node.pos;
+		float dist = Vector3.Distance(tPos, aPos);
+
+		Vector3 aVel = rb.velocity;
+		Vector3 tVel = node.vel;
+
+		Vector3 thing = (tPos - aPos).normalized;
+		
+		if (dist > 2)
+		{
+			pointAt(tPos);
+			float tAng = ab2p(tPos, aPos);
+			float aAng = rb.transform.eulerAngles.y;
+
+			float stopDist = rb.velocity.magnitude * rb.velocity.magnitude / 2 * acc;
+			//Debug.Log(stopDist);
+			if (tAng - aAng < 0.00000000001)
+			{
+				if (stopDist < dist + 2)
+				{
+					Debug.Log("accl");
+					//thrustIn(new Vector3(0, 0, 1));
+					//pointVV(tPos-aPos);
+				} else {
+					Debug.Log("dccl");
+					//thrustIn(new Vector3(0, 0, -1));
+				}
+			}
+		} else {
+			strafeToNode2(node);
+		}
+	}
+
 	private void flyToNode(manoeuvreNode node)
 	{
-		strafeToNode2(node);
+		//strafeToNode2(node);
+		BachStrafer(node);
 	}
 
 	private void flyCourse()
 	{
-		if(course != null)
+		if(course != null && moveToPoint)
 		{
 			if(course.Count > 0 && runCourse)
 			{
@@ -418,17 +493,17 @@ public class shipController : MonoBehaviour
 
 	private void FixedUpdate()
 	{
-		//stabilityAssistant();
+		stabilityAssistant();
 		//pointStrafer();
-		//flyCourse();
+		flyCourse();
 		//updateUI();
 	}
 
 	private void Update()
 	{
-		stabilityAssistant();
+		//stabilityAssistant();
 		//pointStrafer();
-		flyCourse();
+		//flyCourse();
 		updateUI();
 		//drawLineToDest();
 		//drawPathToPoint();
