@@ -480,13 +480,8 @@ public class shipController : MonoBehaviour
 
 	private void flyToNode(manoeuvreNode node)
 	{
-<<<<<<< HEAD
-		//strafeToNode2(node);
-		BachStrafer(node);
-=======
 		pointAt(node.pos);
 		strafeToNode2(node);
->>>>>>> 70a26328768b3fa4f9f6c53346fa16b7c365dfd8
 	}
 
 	private void flyCourse()
