@@ -1,15 +1,13 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.AI;
 
 public class shipController : MonoBehaviour
 {
 	public float thrust = 1;
 	public float throttle = 100;
 	public float throttleMax = 100;
-	//public Vector3 thrustVectorsP = new Vector3( 2,  1,  1);
-	//public Vector3 thrustVectorsN = new Vector3( 1,  1,  1);
 	public float throttleResponse = 20;
 	public float rspeed = 300;
 
@@ -27,6 +25,8 @@ public class shipController : MonoBehaviour
 	private bool movingToPoint = false;
 	public bool moveToPoint = false;
 	public bool destReached = false;
+
+	public NavMeshAgent agent;
 
 	private float lastAV = 0;
 
@@ -85,11 +85,23 @@ public class shipController : MonoBehaviour
 		}
 	}
 
-	public void thrustIn(Vector3 dir)
+	public void thrustIn(Vector3 dir, bool rel = true)
 	{
 		dir *= thrust * throttle;
+		if (rel)
+		{
+			gameObject.GetComponent<Rigidbody>().AddRelativeForce(dir);
+		} else {
+			gameObject.GetComponent<Rigidbody>().AddForce(dir);
+		}
+	}
 
-		gameObject.GetComponent<Rigidbody>().AddRelativeForce(dir);
+	private bool inputFixedUpdate = false;
+	private Vector3 inputThrustDir = Vector3.zero;
+	public void inputThrustIn(Vector3 dir)
+	{
+		inputThrustDir = dir;
+		inputFixedUpdate = true;
 	}
 
 	// points the ship to an angle
@@ -250,31 +262,26 @@ public class shipController : MonoBehaviour
 		runCourse = true;
 	}
 
-	public void setCourse()
+	public void makeAndSetCourse(Vector3 dest)
 	{
-		/*
-		runCourse = true;
-		for(int i = 0;i< course.Count-1; i++)
+		NavMeshPath path = new NavMeshPath();
+		agent.CalculatePath(dest, path);
+		for (int i = 1; i < path.corners.Length; i++)
 		{
-			course[i].velVec = (course[i + 1].pos - course[i].pos).normalized;
-		}
-		*/
-
-		// Get Path
-		UnityEngine.AI.NavMeshPath path = gameObject.transform.GetChild(3).GetComponent<ShowGoldenPath>().getPath();
-		// loop through all corners of the path, create node and pass it to accNodes
-		for (int i = 0; i < path.corners.Length; i++) {
 			manoeuvreNode node = new manoeuvreNode();
 			node.pos = path.corners[i];
 			accNodes(node);
 		}
-		// start course?
+		setCourse();
+	}
+
+	public void setCourse()
+	{
 		runCourse = true;
 		for(int i = 0;i< course.Count-1; i++)
 		{
 			course[i].velVec = (course[i + 1].pos - course[i].pos).normalized;
 		}
-		
 	}
 
 	public void clearNodes()
@@ -451,37 +458,68 @@ public class shipController : MonoBehaviour
 		Vector3 aVel = rb.velocity;
 		Vector3 tVel = node.vel;
 
-		Vector3 thing = (tPos - aPos).normalized;
-		
+		Vector3 aVelVec = aVel.normalized;
+
+		Vector3 hv = (tPos - aPos).normalized;
+
+		Vector3 eVelVel = (hv - aVelVec).normalized;
+
 		if (dist > 2)
 		{
 			pointAt(tPos);
 			float tAng = ab2p(tPos, aPos);
 			float aAng = rb.transform.eulerAngles.y;
+			float v = aVel.magnitude;
+			float a = acc;
+			float t = v / a;
+			float stopDist = (v*t) + 0.5f*(a*t*t);
+			//Debug.Log("dist: " + (dist + 2));
+			//Debug.Log("stopDist: " + stopDist + "\nDist: " + dist);
 
-			float stopDist = rb.velocity.magnitude * rb.velocity.magnitude / 2 * acc;
-			//Debug.Log(stopDist);
-			if (tAng - aAng < 0.00000000001)
+			float hangle = Vector3.Distance(hv, aVelVec);
+
+			Vector3 thang =  (( hv / 2) + eVelVel).normalized;
+			Vector3 thang2 = ((-hv / 2) + eVelVel).normalized;
+
+			//Debug.Log(
+			//	"\ntang: " + tAng +
+			//	"\naang: " + aAng
+			//	);
+
+			if (tAng - aAng < 0.001)
 			{
-				if (stopDist < dist + 2)
+				if (hangle <= 1f)
 				{
-					Debug.Log("accl");
-					//thrustIn(new Vector3(0, 0, 1));
-					//pointVV(tPos-aPos);
+					if (stopDist < dist - 1.5)
+					{
+						//Debug.Log("accl");
+						thrustIn(thang, false);
+						//pointVV(tPos-aPos);
+					} else {
+						//Debug.Log("dccl");
+						thrustIn(thang2, false);
+					}
 				} else {
-					Debug.Log("dccl");
-					//thrustIn(new Vector3(0, 0, -1));
+					//Debug.Log("hangle: " + hangle);
+					thrustIn(thang, false);
+					//strafeToNode2(node);
 				}
+			} else {
+				//Debug.Log("bangle");
+				thrustIn(thang, false);
+				//strafeToNode2(node);
 			}
 		} else {
+			//Debug.Log("stafe");
 			strafeToNode2(node);
 		}
 	}
 
 	private void flyToNode(manoeuvreNode node)
 	{
-		pointAt(node.pos);
-		strafeToNode2(node);
+		//pointAt(node.pos);
+		//strafeToNode2(node);
+		BachStrafer(node);
 	}
 
 	private void flyCourse()
@@ -511,6 +549,12 @@ public class shipController : MonoBehaviour
 
 	private void FixedUpdate()
 	{
+		if(inputFixedUpdate)
+		{
+			thrustIn(inputThrustDir);
+			inputFixedUpdate = false;
+			inputThrustDir = Vector3.zero;
+		}
 		stabilityAssistant();
 		//pointStrafer();
 		flyCourse();
@@ -526,6 +570,9 @@ public class shipController : MonoBehaviour
 		//drawLineToDest();
 		//drawPathToPoint();
 		//temporary thing
-		gameObject.transform.GetChild(3).position  = gameObject.transform.position;
+		if (transform.childCount > 3)
+		{
+			gameObject.transform.GetChild(3).position = gameObject.transform.position;
+		}
 	}
 }

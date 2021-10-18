@@ -133,23 +133,26 @@ public class PlayerController : MonoBehaviour
 		*/
 		// new movement method
 
-		if(Input.GetMouseButtonDown(2)) {
+		if(Input.GetMouseButtonDown(2))
+		{
 			//clear the path
 			sc.clearNodes();
 			// update the destination point for the nav mesh agent
-			gameObject.transform.GetChild(3).GetComponent<ShowGoldenPath>().updateDestination(getMousePos());
+			//gameObject.transform.GetChild(3).GetComponent<ShowGoldenPath>().updateDestination(getMousePos());
 			// set the course of the ship
-			sc.setCourse();
+			//sc.setCourse();
+			sc.makeAndSetCourse(getMousePos());
 		}
 
-		if(Input.GetKey(KeyCode.Space)) {
+		if(Input.GetKey(KeyCode.Space))
+		{
 			sc.clearNodes();
 		}
 
 		if (kpress)
 		{
 			sc.setThrottle(tr);
-			sc.thrustIn(new Vector3(x, 0, z));
+			sc.inputThrustIn(new Vector3(x, 0, z));
 			sc.rotate(new Vector3(0, r, 0));
 		}
 
