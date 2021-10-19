@@ -41,6 +41,8 @@ public class shipController : MonoBehaviour
 	private List<manoeuvreNode> course = new List<manoeuvreNode>();
 	private bool runCourse = false;
 
+	public bool player = false;
+
 	public void Start()
 	{
 		ui = transform.Find("ShipUI").gameObject;
@@ -142,11 +144,16 @@ public class shipController : MonoBehaviour
 	{
 		NavMeshPath path = new NavMeshPath();
 		agent.CalculatePath(dest, path);
-		for (int i = 1; i < path.corners.Length; i++)
+		int thing = 0;
+		if(path.corners.Length > 1)
+		{
+			thing = 1;
+		}
+		for (int i = thing; i < path.corners.Length; i++)
 		{
 			manoeuvreNode node = new manoeuvreNode();
 			node.pos = path.corners[i];
-			accNodes(node);
+			accNodes(node,player);
 		}
 		setCourse();
 	}
@@ -169,10 +176,13 @@ public class shipController : MonoBehaviour
 		course.Clear();
 	}
 
-	public void accNodes(manoeuvreNode node)
+	public void accNodes(manoeuvreNode node, bool maker = false)
 	{
 		runCourse = false;
-		node.setMarker(Instantiate(markerRef));
+		if (maker)
+		{
+			node.setMarker(Instantiate(markerRef));
+		}
 		course.Add(node);
 	}
 
@@ -261,26 +271,19 @@ public class shipController : MonoBehaviour
 			//	"\naang: " + aAng
 			//	);
 
-			if (tAng - aAng < 0.001)
+			if (hangle <= 1f)
 			{
-				if (hangle <= 1f)
+				if (stopDist < dist - 1.5)
 				{
-					if (stopDist < dist - 1.5)
-					{
-						//Debug.Log("accl");
-						thrustIn(thang, false);
-						//pointVV(tPos-aPos);
-					} else {
-						//Debug.Log("dccl");
-						thrustIn(thang2, false);
-					}
-				} else {
-					//Debug.Log("hangle: " + hangle);
+					//Debug.Log("accl");
 					thrustIn(thang, false);
-					//strafeToNode2(node);
+					//pointVV(tPos-aPos);
+				} else {
+					//Debug.Log("dccl");
+					thrustIn(thang2, false);
 				}
 			} else {
-				//Debug.Log("bangle");
+				//Debug.Log("hangle: " + hangle);
 				thrustIn(thang, false);
 				//strafeToNode2(node);
 			}

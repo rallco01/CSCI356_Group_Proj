@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour
 	{
 		pl = gameObject.GetComponentInChildren<projectileLauncher>();
 		sc = gameObject.GetComponentInChildren<shipController>();
+		sc.player = true;
 	}
 
 	private Vector3 mp;
