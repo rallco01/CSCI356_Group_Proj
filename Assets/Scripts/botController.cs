@@ -42,7 +42,7 @@ public class botController : MonoBehaviour
 		{
 			futurePos = trb.position + trb.velocity * time;
 		} else {
-			Debug.Log(tacc);
+			//Debug.Log(tacc);
 			for(int i =0;i<3;i++)
 			{
 				float a = ((trb.velocity[i] - ltv[i]) / (Time.fixedDeltaTime)+lta[i])/2;
