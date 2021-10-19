@@ -32,8 +32,6 @@ public class shipController : MonoBehaviour
 
 	private GameObject boi;
 
-	private GameObject camera;
-
 	private GameObject ui;
 
 	public GameObject markerRef;
@@ -46,7 +44,6 @@ public class shipController : MonoBehaviour
 	public void Start()
 	{
 		ui = transform.Find("ShipUI").gameObject;
-		camera = Camera.main.gameObject;
 	}
 
 	public void setStabass(bool stabass)
@@ -135,127 +132,6 @@ public class shipController : MonoBehaviour
 		}
 	}
 
-	public void strafeToPoint(Vector3 point)
-	{
-		destPoint = point;
-		destReached = false;
-	}
-
-	private void pointStrafer()
-	{
-		if (moveToPoint)
-		{
-			if (gameObject.GetComponent<Rigidbody>().velocity.magnitude < 0.0001 && (destPoint - gameObject.transform.position).magnitude < 1)
-			{
-				movingToPoint = false;
-				destReached = true;
-			} else {
-				movingToPoint = true;
-			}
-			if ((destPoint - gameObject.transform.position).magnitude > 0.1)
-			{
-				//pointAt(destPoint);
-			}
-			if (movingToPoint && destPoint != null)
-			{
-				Vector3 vel = gameObject.GetComponent<Rigidbody>().velocity;
-
-				//Vector3 vv = vel.normalized;
-				Vector3 hv = (destPoint - transform.position).normalized;
-
-				Vector3 p = -(vel); //+ (vv-hv)*0);
-
-				float dist = Vector3.Distance(destPoint, gameObject.transform.position);
-				Vector3 i = hv;
-				float wackfac = 50;
-				if (dist > wackfac)
-				{
-					dist = wackfac + (wackfac / dist);
-				}
-				i *= dist;
-
-				Vector3 d = -(vel - lastVel) / Time.deltaTime;
-				lastVel = vel;
-
-				Vector3 PID = mP * p + mI * i + mD * d;
-
-				float maxT = thrust * throttleMax;
-				float minT = -maxT;
-
-				PID.x = Mathf.Clamp(PID.x, minT, maxT);
-				PID.y = Mathf.Clamp(PID.y, minT, maxT);
-				PID.z = Mathf.Clamp(PID.z, minT, maxT);
-
-				gameObject.GetComponent<Rigidbody>().AddForce(PID);
-			}
-		}
-	}
-
-	private void updateUI()
-	{
-		float scale = Mathf.Log(camera.transform.position.y, 3) - 2;
-		if (scale < 1)
-		{
-			scale = 1;
-		}
-		ui.transform.localScale = new Vector3(scale, scale, scale);
-
-		Vector2 vel = new Vector2(transform.GetComponent<Rigidbody>().velocity.x, transform.GetComponent<Rigidbody>().velocity.z);
-		float ang = Mathf.Rad2Deg * Mathf.Atan2(vel.x, vel.y);
-		ui.transform.GetChild(3).eulerAngles = new Vector3(0, ang, 0);
-		ui.GetComponentInChildren<Slider>().value = Mathf.Max(10, (vel.magnitude * vel.magnitude / 2) + 10);
-		ui.transform.GetChild(4).GetComponentInChildren<Text>().text = "" + vel.magnitude.ToString("N") + "u/s";
-		ui.transform.GetChild(4).eulerAngles = Vector3.zero;
-
-		if (destReached && marker != null)
-		{
-			Destroy(marker);
-			marker = null;
-		}
-	}
-
-	private void stabilityAssistant()
-	{
-		/* Stability Assist:
-		 * Because the rotation of the ship is controlled through physics
-		 * there needs to be a physics based way to maintain a heading.
-		 * This is done using a PID (proportional integral derivative) controll loop
-		 * to vary the direction and magnitude of a rotatial force to keep a ships heading
-		 * 
-		 *  Proportional (p): A steady heading is have a rotational velocity of 0°/s.
-		 *    This is set to be the angular velocity of the ship in the opposite direction,
-		 *    so that it applies force in the oppisite directoion of its rotation stopping it
-		 *  
-		 *  Integral (i): The intergral of velocity is position, so have a steady heading
-		 *    is having a constant position, x°. This is set to be the difference of between,
-		 *    the current heading and the desired heading.
-		 *  
-		 *  Derivative (d): The derivity of velocity is accelleration.
-		 */
-		float t = Time.deltaTime;
-		if (stabass)
-		{
-			float p = -gameObject.GetComponent<Rigidbody>().angularVelocity.y;
-			float i = stabassAngle - gameObject.transform.eulerAngles.y;
-
-			//this is done to make sure it rotates going the shortest distance, especially when going between angle such as 300° and 10° where it crosses 0°
-			if (i < -180)
-			{
-				i += 360;
-			}
-			if (i > 180)
-			{
-				i -= 360;
-			}
-
-			float d = -(gameObject.GetComponent<Rigidbody>().angularVelocity.y - lastAV) / t;
-
-			float PID = sP * p + sD * d + sI * i;
-
-			gameObject.GetComponent<Rigidbody>().AddRelativeTorque(0, PID, 0);
-		}
-	}
-
 	public void setCourse(List<manoeuvreNode> nodes)
 	{
 		course = nodes;
@@ -300,32 +176,6 @@ public class shipController : MonoBehaviour
 		course.Add(node);
 	}
 
-	private void strafeToNode1(manoeuvreNode node)
-	{
-		Vector3 vel = gameObject.GetComponent<Rigidbody>().velocity;
-
-		//Vector3 vv = vel.normalized;
-		Vector3 hv = (node.pos - transform.position).normalized;
-		float dist = Vector3.Distance(node.pos, gameObject.transform.position);
-		Vector3 p = -(vel);
-
-		Vector3 i = hv*dist;
-
-		Vector3 d = -(vel - lastVel) / Time.deltaTime;
-		lastVel = vel;
-
-		Vector3 PID = mP * p + mI * i + mD * d;
-
-		float maxT = thrust * throttleMax;
-		float minT = -maxT;
-
-		PID.x = Mathf.Clamp(PID.x, minT, maxT);
-		PID.y = Mathf.Clamp(PID.y, minT, maxT);
-		PID.z = Mathf.Clamp(PID.z, minT, maxT);
-
-		gameObject.GetComponent<Rigidbody>().AddForce(PID);
-	}
-
 	private void strafeToNode2(manoeuvreNode node)
 	{
 		Rigidbody rb = GetComponent<Rigidbody>();
@@ -364,81 +214,6 @@ public class shipController : MonoBehaviour
 		PID.z = Mathf.Clamp(PID.z, minT, maxT);
 
 		gameObject.GetComponent<Rigidbody>().AddForce(PID);
-	}
-
-	private void strafeToNode(manoeuvreNode node)
-	{
-		Vector3 vel = gameObject.GetComponent<Rigidbody>().velocity;
-
-		//Vector3 vv = vel.normalized;
-		Vector3 hv = (node.pos - transform.position).normalized;
-		float dist = Vector3.Distance(node.pos, gameObject.transform.position);
-
-		float wackatk = 1;
-
-		if(dist > 20)
-		{
-			wackatk = 1 / dist;
-		}
-
-		if(vel.magnitude > 20 && dist < 40)
-		{
-			wackatk = vel.magnitude;
-		}
-
-		Vector3 p = -(vel*wackatk);
-
-		Vector3 i = hv;
-		float wackfac = 50;
-		if (dist > wackfac)
-		{
-			dist = wackfac + (wackfac / dist);
-		}
-		i *= dist;
-
-		Vector3 d = -(vel - lastVel) / Time.deltaTime;
-		lastVel = vel;
-
-		Vector3 PID = mP * p + mI * i + mD * d;
-
-		float maxT = thrust * throttleMax;
-		float minT = -maxT;
-
-		PID.x = Mathf.Clamp(PID.x, minT, maxT);
-		PID.y = Mathf.Clamp(PID.y, minT, maxT);
-		PID.z = Mathf.Clamp(PID.z, minT, maxT);
-
-		gameObject.GetComponent<Rigidbody>().AddForce(PID);
-	}
-
-	private Vector2 rotateVec2(Vector2 v, float theta)
-	{
-		float x = v.x * Mathf.Cos(theta) - v.y * Mathf.Sin(theta);
-		float y = v.x * Mathf.Sin(theta) + v.y * Mathf.Cos(theta);
-		return new Vector2(x, y);
-	}
-
-	private void pointVV(Vector3 dir)
-	{
-		Rigidbody rb = GetComponent<Rigidbody>();
-		float maxT = thrust * throttleMax;
-		float minT = -maxT;
-
-		// Velocity vectors
-		Vector3 aVel = rb.velocity.normalized;
-		Vector3 tVel = dir.normalized;
-
-		Vector3 eVel = tVel - aVel;
-
-		Vector2 vv = rotateVec2(new Vector2(eVel.x, eVel.z),rb.transform.eulerAngles.y).normalized;
-
-		thrustIn(new Vector3(vv.x, 0, vv.y));
-
-		//PID.x = Mathf.Clamp(PID.x, minT, maxT);
-		//PID.y = Mathf.Clamp(PID.y, minT, maxT);
-		//PID.z = Mathf.Clamp(PID.z, minT, maxT);
-
-		//rb.AddForce(PID);
 	}
 
 	private void BachStrafer(manoeuvreNode node)
@@ -517,8 +292,6 @@ public class shipController : MonoBehaviour
 
 	private void flyToNode(manoeuvreNode node)
 	{
-		//pointAt(node.pos);
-		//strafeToNode2(node);
 		BachStrafer(node);
 	}
 
@@ -544,7 +317,48 @@ public class shipController : MonoBehaviour
 				return;
 			}
 		}
-		//stabilityAssistant();
+	}
+
+	private void stabilityAssistant()
+	{
+		/* Stability Assist:
+		 * Because the rotation of the ship is controlled through physics
+		 * there needs to be a physics based way to maintain a heading.
+		 * This is done using a PID (proportional integral derivative) controll loop
+		 * to vary the direction and magnitude of a rotatial force to keep a ships heading
+		 * 
+		 *  Proportional (p): A steady heading is have a rotational velocity of 0°/s.
+		 *    This is set to be the angular velocity of the ship in the opposite direction,
+		 *    so that it applies force in the oppisite directoion of its rotation stopping it
+		 *  
+		 *  Integral (i): The intergral of velocity is position, so have a steady heading
+		 *    is having a constant position, x°. This is set to be the difference of between,
+		 *    the current heading and the desired heading.
+		 *  
+		 *  Derivative (d): The derivity of velocity is accelleration.
+		 */
+		float t = Time.deltaTime;
+		if (stabass)
+		{
+			float p = -gameObject.GetComponent<Rigidbody>().angularVelocity.y;
+			float i = stabassAngle - gameObject.transform.eulerAngles.y;
+
+			//this is done to make sure it rotates going the shortest distance, especially when going between angle such as 300° and 10° where it crosses 0°
+			if (i < -180)
+			{
+				i += 360;
+			}
+			if (i > 180)
+			{
+				i -= 360;
+			}
+
+			float d = -(gameObject.GetComponent<Rigidbody>().angularVelocity.y - lastAV) / t;
+
+			float PID = sP * p + sD * d + sI * i;
+
+			gameObject.GetComponent<Rigidbody>().AddRelativeTorque(0, PID, 0);
+		}
 	}
 
 	private void FixedUpdate()
@@ -556,23 +370,198 @@ public class shipController : MonoBehaviour
 			inputThrustDir = Vector3.zero;
 		}
 		stabilityAssistant();
-		//pointStrafer();
 		flyCourse();
-		//updateUI();
+	}
+
+	private void updateUI()
+	{
+		float scale = Mathf.Log(Camera.main.transform.position.y, 3) - 2;
+		if (scale < 1)
+		{
+			scale = 1;
+		}
+		ui.transform.localScale = new Vector3(scale, scale, scale);
+
+		Vector2 vel = new Vector2(transform.GetComponent<Rigidbody>().velocity.x, transform.GetComponent<Rigidbody>().velocity.z);
+		float ang = Mathf.Rad2Deg * Mathf.Atan2(vel.x, vel.y);
+		ui.transform.GetChild(3).eulerAngles = new Vector3(0, ang, 0);
+		ui.GetComponentInChildren<Slider>().value = Mathf.Max(10, (vel.magnitude * vel.magnitude / 2) + 10);
+		ui.transform.GetChild(4).GetComponentInChildren<Text>().text = "" + vel.magnitude.ToString("N") + "u/s";
+		ui.transform.GetChild(4).eulerAngles = Vector3.zero;
+
+		if (destReached && marker != null)
+		{
+			Destroy(marker);
+			marker = null;
+		}
 	}
 
 	private void Update()
 	{
-		//stabilityAssistant();
-		//pointStrafer();
-		//flyCourse();
 		updateUI();
-		//drawLineToDest();
-		//drawPathToPoint();
-		//temporary thing
 		if (transform.childCount > 3)
 		{
 			gameObject.transform.GetChild(3).position = gameObject.transform.position;
 		}
 	}
 }
+
+//OLD CODE
+/*
+	private void pointVV(Vector3 dir)
+	{
+		Rigidbody rb = GetComponent<Rigidbody>();
+		float maxT = thrust * throttleMax;
+		float minT = -maxT;
+
+		// Velocity vectors
+		Vector3 aVel = rb.velocity.normalized;
+		Vector3 tVel = dir.normalized;
+
+		Vector3 eVel = tVel - aVel;
+
+		Vector2 vv = rotateVec2(new Vector2(eVel.x, eVel.z),rb.transform.eulerAngles.y).normalized;
+
+		thrustIn(new Vector3(vv.x, 0, vv.y));
+
+		//PID.x = Mathf.Clamp(PID.x, minT, maxT);
+		//PID.y = Mathf.Clamp(PID.y, minT, maxT);
+		//PID.z = Mathf.Clamp(PID.z, minT, maxT);
+
+		//rb.AddForce(PID);
+	}
+
+	private Vector2 rotateVec2(Vector2 v, float theta)
+	{
+		float x = v.x * Mathf.Cos(theta) - v.y * Mathf.Sin(theta);
+		float y = v.x * Mathf.Sin(theta) + v.y * Mathf.Cos(theta);
+		return new Vector2(x, y);
+	}
+
+	private void strafeToNode1(manoeuvreNode node)
+	{
+		Vector3 vel = gameObject.GetComponent<Rigidbody>().velocity;
+
+		//Vector3 vv = vel.normalized;
+		Vector3 hv = (node.pos - transform.position).normalized;
+		float dist = Vector3.Distance(node.pos, gameObject.transform.position);
+		Vector3 p = -(vel);
+
+		Vector3 i = hv*dist;
+
+		Vector3 d = -(vel - lastVel) / Time.deltaTime;
+		lastVel = vel;
+
+		Vector3 PID = mP * p + mI * i + mD * d;
+
+		float maxT = thrust * throttleMax;
+		float minT = -maxT;
+
+		PID.x = Mathf.Clamp(PID.x, minT, maxT);
+		PID.y = Mathf.Clamp(PID.y, minT, maxT);
+		PID.z = Mathf.Clamp(PID.z, minT, maxT);
+
+		gameObject.GetComponent<Rigidbody>().AddForce(PID);
+	}
+
+	private void strafeToNode(manoeuvreNode node)
+	{
+		Vector3 vel = gameObject.GetComponent<Rigidbody>().velocity;
+
+		//Vector3 vv = vel.normalized;
+		Vector3 hv = (node.pos - transform.position).normalized;
+		float dist = Vector3.Distance(node.pos, gameObject.transform.position);
+
+		float wackatk = 1;
+
+		if(dist > 20)
+		{
+			wackatk = 1 / dist;
+		}
+
+		if(vel.magnitude > 20 && dist < 40)
+		{
+			wackatk = vel.magnitude;
+		}
+
+		Vector3 p = -(vel*wackatk);
+
+		Vector3 i = hv;
+		float wackfac = 50;
+		if (dist > wackfac)
+		{
+			dist = wackfac + (wackfac / dist);
+		}
+		i *= dist;
+
+		Vector3 d = -(vel - lastVel) / Time.deltaTime;
+		lastVel = vel;
+
+		Vector3 PID = mP * p + mI * i + mD * d;
+
+		float maxT = thrust * throttleMax;
+		float minT = -maxT;
+
+		PID.x = Mathf.Clamp(PID.x, minT, maxT);
+		PID.y = Mathf.Clamp(PID.y, minT, maxT);
+		PID.z = Mathf.Clamp(PID.z, minT, maxT);
+
+		gameObject.GetComponent<Rigidbody>().AddForce(PID);
+	}
+
+	private void pointStrafer()
+	{
+		if (moveToPoint)
+		{
+			if (gameObject.GetComponent<Rigidbody>().velocity.magnitude < 0.0001 && (destPoint - gameObject.transform.position).magnitude < 1)
+			{
+				movingToPoint = false;
+				destReached = true;
+			} else {
+				movingToPoint = true;
+			}
+			if ((destPoint - gameObject.transform.position).magnitude > 0.1)
+			{
+				//pointAt(destPoint);
+			}
+			if (movingToPoint && destPoint != null)
+			{
+				Vector3 vel = gameObject.GetComponent<Rigidbody>().velocity;
+
+				//Vector3 vv = vel.normalized;
+				Vector3 hv = (destPoint - transform.position).normalized;
+
+				Vector3 p = -(vel); //+ (vv-hv)*0);
+
+				float dist = Vector3.Distance(destPoint, gameObject.transform.position);
+				Vector3 i = hv;
+				float wackfac = 50;
+				if (dist > wackfac)
+				{
+					dist = wackfac + (wackfac / dist);
+				}
+				i *= dist;
+
+				Vector3 d = -(vel - lastVel) / Time.deltaTime;
+				lastVel = vel;
+
+				Vector3 PID = mP * p + mI * i + mD * d;
+
+				float maxT = thrust * throttleMax;
+				float minT = -maxT;
+
+				PID.x = Mathf.Clamp(PID.x, minT, maxT);
+				PID.y = Mathf.Clamp(PID.y, minT, maxT);
+				PID.z = Mathf.Clamp(PID.z, minT, maxT);
+
+				gameObject.GetComponent<Rigidbody>().AddForce(PID);
+			}
+		}
+	}
+
+	public void strafeToPoint(Vector3 point)
+	{
+		destPoint = point;
+		destReached = false;
+	}
+ */
