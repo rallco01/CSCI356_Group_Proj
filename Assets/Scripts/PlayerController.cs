@@ -32,6 +32,8 @@ public class PlayerController : MonoBehaviour
 		}
 	}
 
+	float lst = 0;
+
 	void Update()
 	{
 		float t = Time.deltaTime;
@@ -100,9 +102,9 @@ public class PlayerController : MonoBehaviour
 			sc.setStabass(!sc.stabass);
 		}
 
-		if(Input.GetMouseButtonDown(0))
+		if(Input.GetMouseButton(0))
 		{
-			pl.shoot();
+			pl.shootBurst(10);
 		}
 
 		if(Input.GetMouseButton(1))

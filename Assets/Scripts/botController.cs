@@ -12,11 +12,14 @@ public class botController : MonoBehaviour
 		target = GameObject.Find("Ship");
 		pl = gameObject.GetComponentInChildren<projectileLauncher>();
 		sc = gameObject.GetComponentInChildren<shipController>();
-		sc.player = true;
+		sc.player = false;
 	}
 
 	Vector3 ltv = Vector3.zero;
 	Vector3 lta = Vector3.zero;
+	/// <summary>
+	/// THIS NEEDS TO BE INCLUDED IN PRESENTATION
+	/// </summary>
 	void FixedUpdate()
 	{
 		Rigidbody rb = GetComponent<Rigidbody>();

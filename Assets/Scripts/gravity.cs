@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+/// <summary>
+/// THIS NEEDS TO BE INCLUDED IN PRESENTATION
+/// </summary>
 public class gravity : MonoBehaviour
 {
 	private GameObject boi = null; // Body of Influence, i.e a planet

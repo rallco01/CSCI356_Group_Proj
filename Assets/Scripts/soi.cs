@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 //Sphere of Influence
+/// <summary>
+/// THIS NEEDS TO BE INCLUDED IN PRESENTATION
+/// </summary>
 public class soi : MonoBehaviour
 {
 	//A reference to the planet that has the SoI

@@ -43,6 +43,8 @@ public class shipController : MonoBehaviour
 
 	public bool player = false;
 
+	public float health = 100;
+
 	public void Start()
 	{
 		ui = transform.Find("ShipUI").gameObject;
@@ -186,6 +188,9 @@ public class shipController : MonoBehaviour
 		course.Add(node);
 	}
 
+	/// <summary>
+	/// THIS NEEDS TO BE INCLUDED IN PRESENTATION
+	/// </summary>
 	private void strafeToNode2(manoeuvreNode node)
 	{
 		Rigidbody rb = GetComponent<Rigidbody>();
@@ -226,6 +231,9 @@ public class shipController : MonoBehaviour
 		gameObject.GetComponent<Rigidbody>().AddForce(PID);
 	}
 
+	/// <summary>
+	/// THIS NEEDS TO BE INCLUDED IN PRESENTATION
+	/// </summary>
 	private void BachStrafer(manoeuvreNode node)
 	{
 		Rigidbody rb = GetComponent<Rigidbody>();
@@ -293,11 +301,17 @@ public class shipController : MonoBehaviour
 		}
 	}
 
+	/// <summary>
+	/// THIS NEEDS TO BE INCLUDED IN PRESENTATION
+	/// </summary>
 	private void flyToNode(manoeuvreNode node)
 	{
 		BachStrafer(node);
 	}
 
+	/// <summary>
+	/// THIS NEEDS TO BE INCLUDED IN PRESENTATION
+	/// </summary>
 	private void flyCourse()
 	{
 		if(course != null && moveToPoint)
@@ -322,6 +336,9 @@ public class shipController : MonoBehaviour
 		}
 	}
 
+	/// <summary>
+	/// THIS NEEDS TO BE INCLUDED IN PRESENTATION
+	/// </summary>
 	private void stabilityAssistant()
 	{
 		/* Stability Assist:

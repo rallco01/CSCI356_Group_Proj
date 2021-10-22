@@ -13,14 +13,30 @@ public class projectileLauncher : MonoBehaviour
 		GameObject bullet = Instantiate(projectile, transform);
 		bullet.GetComponent<Rigidbody>().velocity = transform.parent.GetComponent<Rigidbody>().velocity;
 		bullet.GetComponent<Rigidbody>().AddForce(bullet.transform.up * impulseMagnitude, ForceMode.Impulse);
-		bullets.Enqueue((Time.realtimeSinceStartup, bullet));
+	}
 
-		if (bullets.Count > 0)
+	IEnumerator burst(int count)
+	{
+		for (int i = 0;i<count;i++)
 		{
-			if (Time.realtimeSinceStartup - bullets.Peek().time > 30)
-			{
-				Destroy(bullets.Dequeue().bullet);
-			}
+			shoot();
+			yield return new WaitForFixedUpdate();
+		}
+	}
+
+	private void Update()
+	{
+		burstCoolDown += Time.deltaTime;
+	}
+
+	float burstCoolDown = float.MaxValue;
+
+	public void shootBurst(int count)
+	{
+		if (burstCoolDown > 0.5f)
+		{
+			StartCoroutine(burst(count));
+			burstCoolDown = 0;
 		}
 	}
 }
