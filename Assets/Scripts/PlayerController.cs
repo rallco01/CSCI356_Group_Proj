@@ -6,12 +6,15 @@ public class PlayerController : MonoBehaviour
 {
 	private shipController sc = null;
 	private projectileLauncher pl = null;
+	private missileLauncher ml = null;
+	public GameObject target = null;
 
 	private void Start()
 	{
 		pl = gameObject.GetComponentInChildren<projectileLauncher>();
 		sc = gameObject.GetComponentInChildren<shipController>();
-		sc.player = true;
+		ml = gameObject.GetComponentInChildren<missileLauncher>();
+		//sc.player = true;
 	}
 
 	private Vector3 mp;
@@ -32,7 +35,7 @@ public class PlayerController : MonoBehaviour
 		}
 	}
 
-	float lst = 0;
+	//float lst = 0;
 
 	void Update()
 	{
@@ -104,7 +107,7 @@ public class PlayerController : MonoBehaviour
 
 		if(Input.GetMouseButton(0))
 		{
-			pl.shootBurst(10);
+			pl.shootBurst();
 		}
 
 		if(Input.GetMouseButton(1))
@@ -157,6 +160,11 @@ public class PlayerController : MonoBehaviour
 			sc.setThrottle(tr);
 			sc.inputThrustIn(new Vector3(x, 0, z));
 			sc.rotate(new Vector3(0, r, 0));
+		}
+
+		if(Input.GetKeyDown(KeyCode.M))
+		{
+			ml.shoot(target);
 		}
 
 		if(clearC)

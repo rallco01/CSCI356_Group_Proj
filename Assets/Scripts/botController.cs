@@ -4,15 +4,25 @@ using UnityEngine;
 
 public class botController : MonoBehaviour
 {
-	private GameObject target = null;
+	public GameObject target = null;
 	private shipController sc = null;
 	private projectileLauncher pl = null;
+	Rigidbody rb;
+
+	public bool stayAway = true;
+
+	public bool shoot = true;
+
 	void Start()
 	{
-		target = GameObject.Find("Ship");
+		if (target == null)
+		{
+			target = GameObject.Find("Ship");
+		}
 		pl = gameObject.GetComponentInChildren<projectileLauncher>();
 		sc = gameObject.GetComponentInChildren<shipController>();
-		sc.player = false;
+		rb = GetComponent<Rigidbody>();
+		//sc.player = false;
 	}
 
 	Vector3 ltv = Vector3.zero;
@@ -22,7 +32,6 @@ public class botController : MonoBehaviour
 	/// </summary>
 	void FixedUpdate()
 	{
-		Rigidbody rb = GetComponent<Rigidbody>();
 		Rigidbody trb = target.GetComponent<Rigidbody>();
 		float tacc = trb.velocity.magnitude - ltv.magnitude;
 		float dist = Vector3.Distance(transform.position, target.transform.position);
@@ -39,16 +48,21 @@ public class botController : MonoBehaviour
 		{
 			time = 0;
 		}
-
+		bool accl = true;
 		Vector3 futurePos = Vector3.zero;
 		if (tacc == 0)
 		{
 			futurePos = trb.position + trb.velocity * time;
+			accl = false;
 		} else {
-			//Debug.Log(tacc);
+			if (!stayAway)
+			{
+				Debug.Log(tacc);
+			}
 			for(int i =0;i<3;i++)
 			{
 				float a = ((trb.velocity[i] - ltv[i]) / (Time.fixedDeltaTime)+lta[i])/2;
+				// distance = v*t + 0.5*a*t^2 
 				futurePos[i] = trb.position[i] + trb.velocity[i]*time + 0.5f*(a*time*time);
 				lta[i] = a;
 			}
@@ -56,6 +70,23 @@ public class botController : MonoBehaviour
 		ltv = trb.velocity;
 		sc.clearNodes();
 		Vector3 dest = Vector3.MoveTowards(futurePos, transform.position, 10);
+		if(!stayAway)
+		{
+			dest = Vector3.MoveTowards(futurePos, transform.position, 0);
+		}
 		sc.makeAndSetCourse(dest);
+
+		if (pl != null && shoot)
+		{
+			if (dist < 250)
+			{
+				Vector3 futurePos2 = pl.leadTarget(trb, lta, accl, dist);
+				sc.pointAt(futurePos2);
+				if (dist < 200)
+				{
+					pl.shootBurst();
+				}
+			}
+		}
 	}
 }

@@ -18,11 +18,11 @@ public class shipController : MonoBehaviour
 	public float stabassAngle;
 
 	public Vector3 destPoint;
-	private Vector3 lastVel = Vector3.zero;
+	//private Vector3 lastVel = Vector3.zero;
 	public float mP = 2f;
 	public float mI = 1f;
 	public float mD = 0f;
-	private bool movingToPoint = false;
+	//private bool movingToPoint = false;
 	public bool moveToPoint = false;
 	public bool destReached = false;
 
@@ -43,11 +43,23 @@ public class shipController : MonoBehaviour
 
 	public bool player = false;
 
+	public float maxHealth = 100;
 	public float health = 100;
+
+	public bool targeted = false;
 
 	public void Start()
 	{
-		ui = transform.Find("ShipUI").gameObject;
+		Transform temp = transform.Find("ShipUI");
+		if (temp !=null)
+		{
+			ui = temp.gameObject;
+		}
+		temp = transform.Find("NavMeshAgent");
+		if (temp != null)
+		{
+			//agent = temp.gameObject.GetComponent<NavMeshAgent>();
+		}
 	}
 
 	public void setStabass(bool stabass)
@@ -145,8 +157,10 @@ public class shipController : MonoBehaviour
 	public void makeAndSetCourse(Vector3 dest)
 	{
 		NavMeshPath path = new NavMeshPath();
+		//Debug.Log(dest);
 		agent.CalculatePath(dest, path);
 		int thing = 0;
+		//Debug.Log(path.corners[1]);
 		if(path.corners.Length > 1)
 		{
 			thing = 1;
@@ -231,6 +245,8 @@ public class shipController : MonoBehaviour
 		gameObject.GetComponent<Rigidbody>().AddForce(PID);
 	}
 
+	public bool noStop = false;
+
 	/// <summary>
 	/// THIS NEEDS TO BE INCLUDED IN PRESENTATION
 	/// </summary>
@@ -257,7 +273,7 @@ public class shipController : MonoBehaviour
 
 		Vector3 eVelVel = (hv - aVelVec).normalized;
 
-		if (dist > 2)
+		if (dist > 2 || noStop)
 		{
 			pointAt(tPos);
 			float tAng = ab2p(tPos, aPos);
@@ -281,7 +297,7 @@ public class shipController : MonoBehaviour
 
 			if (hangle <= 1f)
 			{
-				if (stopDist < dist - 1.5)
+				if ((stopDist < dist - 1.5)||noStop)
 				{
 					//Debug.Log("accl");
 					thrustIn(thang, false);
@@ -408,20 +424,29 @@ public class shipController : MonoBehaviour
 		ui.GetComponentInChildren<Slider>().value = Mathf.Max(10, (vel.magnitude * vel.magnitude / 2) + 10);
 		ui.transform.GetChild(4).GetComponentInChildren<Text>().text = "" + vel.magnitude.ToString("N") + "u/s";
 		ui.transform.GetChild(4).eulerAngles = Vector3.zero;
+		ui.transform.GetChild(5).GetComponentInChildren<Image>().fillAmount = health / maxHealth;
 
 		if (destReached && marker != null)
 		{
 			Destroy(marker);
 			marker = null;
 		}
+
+		//if(targeted)
+		{
+			ui.transform.Find("Targeted").gameObject.GetComponent<Image>().enabled = targeted;
+		}
 	}
 
 	private void Update()
 	{
-		updateUI();
-		if (transform.childCount > 3)
+		if (ui != null)
 		{
-			gameObject.transform.GetChild(3).position = gameObject.transform.position;
+			updateUI();
+			if (transform.childCount > 3)
+			{
+				gameObject.transform.GetChild(3).position = gameObject.transform.position;
+			}
 		}
 	}
 }

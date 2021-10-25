@@ -28,7 +28,7 @@ public class bulletScript : MonoBehaviour
 
 	private void OnCollisionEnter(Collision collision)
 	{
-		//if (collision.gameObject.GetComponent<bulletScript>() == null)
+		if (collision.gameObject.GetComponent<bulletScript>() == null)
 		{
 			if (collision.gameObject.GetComponent<shipController>() != null)
 			{
@@ -37,7 +37,9 @@ public class bulletScript : MonoBehaviour
 				Rigidbody crb = collision.gameObject.GetComponent<Rigidbody>();
 				Vector3 vdiff = vel - crb.velocity;
 				float energy = 0.5f * rb.mass * vdiff.magnitude * vdiff.magnitude;
-				Debug.Log(energy/crb.mass);
+				float damage = energy / crb.mass;
+				//Debug.Log(energy/crb.mass);
+				sc.health -= damage;
 			}
 			Destroy(gameObject);
 		}
