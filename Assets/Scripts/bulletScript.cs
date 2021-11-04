@@ -39,7 +39,7 @@ public class bulletScript : MonoBehaviour
 				float energy = 0.5f * rb.mass * vdiff.magnitude * vdiff.magnitude;
 				float damage = energy / crb.mass;
 				//Debug.Log(energy/crb.mass);
-				sc.health -= damage;
+				sc.takeDamage(damage);
 			}
 			Destroy(gameObject);
 		}

@@ -80,7 +80,7 @@ public class botController : MonoBehaviour
 		{
 			if (dist < 250)
 			{
-				Vector3 futurePos2 = pl.leadTarget(trb, lta, accl, dist);
+				Vector3 futurePos2 = pl.leadTarget(trb, lta, accl);
 				sc.pointAt(futurePos2);
 				if (dist < 200)
 				{

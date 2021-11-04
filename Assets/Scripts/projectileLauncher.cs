@@ -12,6 +12,15 @@ public class projectileLauncher : MonoBehaviour
 
 	private Vector3 lead = Vector3.zero;
 
+	private AudioSource longShoot;
+	private AudioSource smallShoot;
+
+	public void Start()
+	{
+		longShoot = GetComponents<AudioSource>()[0];
+		smallShoot = GetComponents<AudioSource>()[1];
+	}
+
 	private Queue<(float time, GameObject bullet)> bullets = new Queue<(float time, GameObject bullet)>();
 	public void shoot()
 	{
@@ -22,11 +31,14 @@ public class projectileLauncher : MonoBehaviour
 
 	IEnumerator burst(int count)
 	{
-		for (int i = 0;i<count;i++)
+		longShoot.Play();
+		for (int i = 0; i < count; i++)
 		{
 			shoot();
 			yield return new WaitForFixedUpdate();
 		}
+		longShoot.Stop();
+		smallShoot.Play();
 	}
 
 	private void Update()
@@ -46,7 +58,7 @@ public class projectileLauncher : MonoBehaviour
 	}
 	public float getVelocity()
 	{
-		return impulseMagnitude/projectile.GetComponent<Rigidbody>().mass;
+		return impulseMagnitude / projectile.GetComponent<Rigidbody>().mass;
 	}
 
 	public void showLead()
@@ -74,10 +86,11 @@ public class projectileLauncher : MonoBehaviour
 
 		Vector3 futurePos = Vector3.zero;
 
-		if (A>=0)
+		if (A >= 0)
 		{
 			return trb.position;
-		} else {
+		} else
+		{
 			float rt = Mathf.Sqrt(B * B - 4 * A * C);
 			float dt1 = (-B + rt) / (2 * A);
 			float dt2 = (-B - rt) / (2 * A);
@@ -85,17 +98,73 @@ public class projectileLauncher : MonoBehaviour
 			if (!acc)
 			{
 				futurePos = trb.position + V * dt;
-			} else {
+			} else
+			{
 				for (int i = 0; i < 3; i++)
 				{
 					futurePos[i] = trb.position[i] + trb.velocity[i] * dt + 0.5f * (lta[i] * dt * dt);
 				}
 			}
 		}
-		if(marker != null)
+		if (marker != null)
 		{
 			marker.transform.position = futurePos;
 		}
 		return futurePos;
 	}
 }
+
+//	public Vector3 leadTarget2(Rigidbody trb, Vector3 lta, bool acc)
+//	{
+//		Rigidbody rb = GetComponentInParent<Rigidbody>();
+//		double a = lta.magnitude;
+//		double vt = (trb.velocity - rb.velocity).magnitude;
+//		double d = Vector3.Distance(transform.position, trb.position);
+//		double s2 = getVelocity() * getVelocity();
+
+//		double A = a*a / 4;
+//		double B = a * vt;
+//		double C = a * d + vt * vt - s2;
+//		double D = 2.0 * vt * d;
+//		double E = d * d;
+
+//		double[] t = Roots.solveQuartic(A, B, C, D, E);
+
+//		string zm = "";
+//		for (int i = 0; i < t.Length; i++)
+//		{
+//			zm += t[i] + "\n";
+//		}
+
+//		//Debug.Log(zm);
+
+//		float at = -1;
+//		if (t.Length > 0)
+//		{
+//			at = (float)t[0];
+//		}
+//		for (int i = 1;i<t.Length;i++)
+//		{
+//			if(t[i]>0&&t[i]<at)
+//			{
+//				at = (float)t[i];
+//			}
+//		}
+//		if (at < 0)
+//		{
+//			Debug.Log("No Firing Solution");
+//			return Vector3.zero;
+//		}
+//		Vector3 futurePos = Vector3.zero;
+//		Debug.Log(at);
+//		for (int i = 0; i < 3; i++)
+//		{
+//			futurePos[i] = trb.position[i] + trb.velocity[i] * at + 0.5f * (lta[i] * at * at);
+//		}
+//		if (marker != null)
+//		{
+//			marker.transform.position = futurePos;
+//		}
+//		return futurePos;
+//	}
+//}

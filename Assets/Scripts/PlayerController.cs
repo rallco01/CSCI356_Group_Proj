@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -8,6 +9,8 @@ public class PlayerController : MonoBehaviour
 	private projectileLauncher pl = null;
 	private missileLauncher ml = null;
 	public GameObject target = null;
+
+	public GameObject enemyRef = null;
 
 	private void Start()
 	{
@@ -35,7 +38,32 @@ public class PlayerController : MonoBehaviour
 		}
 	}
 
-	//float lst = 0;
+	//Vector3 ltv = Vector3.zero;
+	//Vector3 lta = Vector3.zero;
+	//private void leadTarget()
+	//{
+	//	Rigidbody trb = target.GetComponent<Rigidbody>();
+	//	float tacc = trb.velocity.magnitude - ltv.magnitude;
+	//	bool accl = true;
+	//	Vector3 dongus = Vector3.zero;
+	//	//if (tacc != 0)
+	//	{
+	//		shipController tsc = trb.gameObject.GetComponent<shipController>();
+	//		float tagg = (tsc.throttle * tsc.thrust) / trb.mass;
+	//		accl = true;
+	//		for (int i = 0; i < 3; i++)
+	//		{
+	//			float a = ((trb.velocity[i] - ltv[i]) / (Time.fixedDeltaTime) + lta[i]) / 2;
+	//			lta[i] = a;
+	//		}
+	//		dongus = lta.normalized * tagg;
+	//	}
+	//	ltv = trb.velocity;
+	//	//pl.leadTarget2(trb, lta, accl);
+	//}
+
+	float spawnEnemyCoolDown = 0;
+	float spawnEmemyThreshold = 90;
 
 	void Update()
 	{
@@ -46,7 +74,6 @@ public class PlayerController : MonoBehaviour
 		float tr = 0;
 		bool kpress = false;
 		bool clearC = false;
-
 
 		if (Input.GetKey(KeyCode.LeftShift))
 		{
@@ -105,6 +132,56 @@ public class PlayerController : MonoBehaviour
 			sc.setStabass(!sc.stabass);
 		}
 
+		if(Input.GetKeyDown(KeyCode.H))
+		{
+			sc.clearNodes();
+			sc.makeAndSetCourse(new Vector3(0,0,0));
+		}
+
+		//if(Input.GetKeyDown(KeyCode.R))
+		//{
+		//	Vector3 mousepos = getMousePos();
+		//	Collider[] colliders = Physics.OverlapSphere(mousepos, 5);
+		//	GameObject closesestEnemy = null;
+		//	if (colliders.Length > 0)
+		//	{
+		//		int cei = colliders.Length;
+		//		for(int i = 0;i<colliders.Length;i++)
+		//		{
+		//			if(colliders[i].gameObject.tag == "Enemy")
+		//			{
+		//				closesestEnemy = colliders[i].gameObject;
+		//				cei = i;
+		//			}
+		//		}
+		//		float lastDist = Vector3.Distance(mousepos, closesestEnemy.transform.position);
+		//		for (int i = cei; i < colliders.Length; i++)
+		//		{
+		//			if(Vector3.Distance(mousepos,colliders[i].gameObject.transform.position) < lastDist)
+		//			{
+		//				closesestEnemy = colliders[i].gameObject;
+		//			}
+		//		}
+		//	}
+		//	if (closesestEnemy != null)
+		//	{
+		//		if (target != null)
+		//		{
+		//			target.GetComponent<shipController>().targeted = false;
+		//		}
+		//		target = closesestEnemy;
+		//		target.GetComponent<shipController>().targeted = true;
+		//		pl.showLead();
+		//	} else {
+		//		if (target != null)
+		//		{
+		//			target.GetComponent<shipController>().targeted = false;
+		//			target = null;
+		//			pl.noSHowLead();
+		//		}
+		//	}
+		//}
+
 		if(Input.GetMouseButton(0))
 		{
 			pl.shootBurst();
@@ -115,44 +192,10 @@ public class PlayerController : MonoBehaviour
 			sc.pointAt(getMousePos());
 		}
 
-		/*
-		if(Input.GetMouseButtonDown(2)&&!Input.GetKey(KeyCode.LeftAlt))
-		{
-			sc.clearNodes();
-			manoeuvreNode node = new manoeuvreNode();
-			node.pos = getMousePos();
-			sc.accNodes(node);
-			sc.setCourse();
-		}
-
-		if(Input.GetKey(KeyCode.LeftAlt) && Input.GetMouseButtonDown(2))
-		{
-			manoeuvreNode node = new manoeuvreNode();
-			node.pos = getMousePos();
-			sc.accNodes(node);
-		}
-
-		if(Input.GetKeyUp(KeyCode.LeftAlt))
-		{
-			sc.setCourse();
-		}
-		*/
-		// new movement method
-
 		if(Input.GetMouseButtonDown(2))
 		{
-			//clear the path
 			sc.clearNodes();
-			// update the destination point for the nav mesh agent
-			//gameObject.transform.GetChild(3).GetComponent<ShowGoldenPath>().updateDestination(getMousePos());
-			// set the course of the ship
-			//sc.setCourse();
 			sc.makeAndSetCourse(getMousePos());
-		}
-
-		if(Input.GetKey(KeyCode.Space))
-		{
-			sc.clearNodes();
 		}
 
 		if (kpress)
@@ -164,7 +207,15 @@ public class PlayerController : MonoBehaviour
 
 		if(Input.GetKeyDown(KeyCode.M))
 		{
-			ml.shoot(target);
+			//ml.shoot(target);
+		}
+
+		if(Input.GetKeyDown(KeyCode.Insert))
+		{
+			if(enemyRef!=null)
+			{
+				Instantiate(enemyRef);
+			}
 		}
 
 		if(clearC)
@@ -173,5 +224,28 @@ public class PlayerController : MonoBehaviour
 		}
 
 		mpdf = false;
+		if (target != null)
+		{
+			//leadTarget();
+		} else	{
+			//pl.noSHowLead();
+		}
+		spawnEnemyCoolDown += Time.deltaTime;
+		Camera.main.transform.GetChild(0).GetChild(0).GetChild(1).gameObject.GetComponent<Slider>().value = 100*(spawnEnemyCoolDown / spawnEmemyThreshold);
+		if (spawnEnemyCoolDown > spawnEmemyThreshold)
+		{
+			spawnEmemyThreshold -= 1;
+			
+			float cdist = Camera.main.transform.position.y*Mathf.Sqrt(3) / 3;
+			Vector3 dir; 
+			dir.x = Random.Range(-1.0f, 1.0f);
+			dir.y = 0;
+			dir.z = Random.Range(-1.0f, 1.0f);
+			dir.Normalize();
+			dir*= cdist;
+			dir += transform.position;
+			Instantiate(enemyRef,dir,enemyRef.transform.rotation);
+			spawnEnemyCoolDown = 0;
+		}
 	}
 }

@@ -48,6 +48,8 @@ public class shipController : MonoBehaviour
 
 	public bool targeted = false;
 
+	public AudioSource thrustsound;
+
 	public void Start()
 	{
 		Transform temp = transform.Find("ShipUI");
@@ -98,6 +100,8 @@ public class shipController : MonoBehaviour
 		}
 	}
 
+	bool thrusting = false;
+
 	public void thrustIn(Vector3 dir, bool rel = true)
 	{
 		dir *= thrust * throttle;
@@ -107,6 +111,7 @@ public class shipController : MonoBehaviour
 		} else {
 			gameObject.GetComponent<Rigidbody>().AddForce(dir);
 		}
+		thrusting = true;
 	}
 
 	private bool inputFixedUpdate = false;
@@ -200,6 +205,16 @@ public class shipController : MonoBehaviour
 			node.setMarker(Instantiate(markerRef));
 		}
 		course.Add(node);
+	}
+
+	public void takeDamage(float damage)
+	{
+		health -= damage;
+		if(health < 0)
+		{
+			health = 0;
+		}
+		healCooldown = 0;
 	}
 
 	/// <summary>
@@ -397,9 +412,12 @@ public class shipController : MonoBehaviour
 		}
 	}
 
+	bool lastThrusting = false;
+
 	private void FixedUpdate()
 	{
-		if(inputFixedUpdate)
+		thrusting = false;
+		if (inputFixedUpdate)
 		{
 			thrustIn(inputThrustDir);
 			inputFixedUpdate = false;
@@ -407,6 +425,15 @@ public class shipController : MonoBehaviour
 		}
 		stabilityAssistant();
 		flyCourse();
+		if(thrusting == true && lastThrusting == false)
+		{
+			thrustsound.Play();
+		}
+		if (thrusting == false && lastThrusting == true)
+		{
+			thrustsound.Stop();
+		}
+		lastThrusting = thrusting;
 	}
 
 	private void updateUI()
@@ -434,8 +461,20 @@ public class shipController : MonoBehaviour
 
 		//if(targeted)
 		{
-			ui.transform.Find("Targeted").gameObject.GetComponent<Image>().enabled = targeted;
+			Transform targui = ui.transform.Find("Targeted Container");
+			targui.transform.eulerAngles = Vector3.zero;
+			targui.Find("Targeted").gameObject.GetComponent<Image>().enabled = targeted;
 		}
+	}
+
+	float healCooldown = float.MaxValue;
+
+	private void die()
+	{
+
+		Camera.main.SendMessage("incScore");
+		clearNodes();
+		Destroy(gameObject);
 	}
 
 	private void Update()
@@ -446,6 +485,28 @@ public class shipController : MonoBehaviour
 			if (transform.childCount > 3)
 			{
 				gameObject.transform.GetChild(3).position = gameObject.transform.position;
+			}
+		}
+		if(health <= 0)
+		{
+			if (!player)
+			{
+				die();
+			} else	{
+				Camera.main.SendMessage("playerDead");
+				die();
+			}
+		}
+		healCooldown += Time.deltaTime;
+		if (healCooldown > 5 && player)
+		{
+			if (health < maxHealth)
+			{
+				health += 100*Time.deltaTime;
+			}
+			if(health > maxHealth)
+			{
+				health = maxHealth;
 			}
 		}
 	}
