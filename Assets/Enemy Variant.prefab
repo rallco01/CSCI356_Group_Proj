@@ -37,6 +37,11 @@ PrefabInstance:
       propertyPath: stayAway
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1399868881005875085, guid: f9f62542f140c9746abbcb2ebb518f28,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1402986275624791000, guid: f9f62542f140c9746abbcb2ebb518f28,
         type: 3}
       propertyPath: targeted
@@ -257,6 +262,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Layer
       value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 7047615196988279312, guid: f9f62542f140c9746abbcb2ebb518f28,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7995476440109699847, guid: f9f62542f140c9746abbcb2ebb518f28,
         type: 3}
