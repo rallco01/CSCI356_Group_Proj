@@ -1534,7 +1534,7 @@ MonoBehaviour:
     m_LineSpacing: 1
   m_Text: 'YOU DIED
 
-    HISCORE:'
+    HIGH SCORE:'
 --- !u!222 &1703186816
 CanvasRenderer:
   m_ObjectHideFlags: 0
